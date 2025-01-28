@@ -1,0 +1,46 @@
+[versions]
+java = "21"
+
+spring-framework = "3.3.3"
+spring-openapi-doc = "2.6.0"
+spring-dependency-managment = "1.1.6"
+
+graalvm = "24.1.0"
+mapstruct = "1.6.2"
+mapstruct-lombok-binding = "0.2.0"
+
+# service APIs deps
+common-api = "0.0.2"
+localization-api = "0.0.7"
+error-api = "0.0.16"
+
+[libraries]
+common-api = { module = "com.github.sibdevtools:api-common", version.ref = "common-api" }
+localization-api = { module = "com.github.sibdevtools:api-localization", version.ref = "localization-api" }
+error-api = { module = "com.github.sibdevtools:api-error", version.ref = "error-api" }
+
+spring-openapi-starter = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-openapi-doc" }
+
+graalvm-js = { module = "org.graalvm.js:js", version.ref = "graalvm" }
+graalvm-js-scriptengine = { module = "org.graalvm.js:js-scriptengine", version.ref = "graalvm" }
+graalvm-python = { module = "org.graalvm.python:python", version.ref = "graalvm" }
+
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+mapstruct-lombok-binding = { module = "org.projectlombok:lombok-mapstruct-binding", version.ref = "mapstruct-lombok-binding" }
+
+[bundles]
+service-api = [
+    "common-api",
+    "localization-api",
+    "error-api"
+]
+graalvm = [
+    "graalvm-js",
+    "graalvm-js-scriptengine",
+    "graalvm-python"
+]
+
+[plugins]
+spring-framework-boot = { id = "org.springframework.boot", version.ref = "spring-framework" }
+spring-dependency-managment = { id = "io.spring.dependency-management", version.ref = "spring-dependency-managment" }
