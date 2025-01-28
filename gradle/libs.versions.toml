@@ -8,6 +8,7 @@ spring-dependency-managment = "1.1.6"
 graalvm = "24.1.0"
 mapstruct = "1.6.2"
 mapstruct-lombok-binding = "0.2.0"
+kafka-clients = "3.9.0"
 
 # service APIs deps
 common-api = "0.0.2"
@@ -28,6 +29,8 @@ graalvm-python = { module = "org.graalvm.python:python", version.ref = "graalvm"
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
 mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
 mapstruct-lombok-binding = { module = "org.projectlombok:lombok-mapstruct-binding", version.ref = "mapstruct-lombok-binding" }
+
+kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka-clients" }
 
 [bundles]
 service-api = [

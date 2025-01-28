@@ -5,6 +5,8 @@ import com.github.sibdevtools.service.kafka.client.entity.BootstrapGroupEntity;
 import com.github.sibdevtools.service.kafka.client.service.BootstrapGroupService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 /**
  * @author sibmaks
  * @since 0.0.1
@@ -47,6 +49,23 @@ public class BootstrapGroupController {
             @PathVariable("code") String code
     ) {
         return bootstrapGroupService.getByCode(code);
+    }
+
+    @GetMapping("/{id}/ping")
+    public boolean ping(
+            @PathVariable("id") String rawId
+    ) {
+        var id = Long.parseLong(rawId);
+        return bootstrapGroupService.ping(id);
+    }
+
+    @GetMapping("/{id}/topics")
+    public Set<String> getTopicNames(
+            @PathVariable("id") String rawId
+    ) {
+        var id = Long.parseLong(rawId);
+        return bootstrapGroupService.getTopicNames(id)
+                .orElseThrow(() -> new RuntimeException("Bootstrap group '%d' not found".formatted(id)));
     }
 
 }

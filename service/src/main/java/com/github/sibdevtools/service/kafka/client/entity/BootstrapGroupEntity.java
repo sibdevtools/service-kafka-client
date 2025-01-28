@@ -27,14 +27,16 @@ public class BootstrapGroupEntity {
     private String code;
     @Column(name = "name", nullable = false)
     private String name;
+    @Column(name = "max_timeout", nullable = false)
+    private long maxTimeout;
     @ElementCollection
     @CollectionTable(
             schema = "kafka_client_service",
-            name = "bootstrap_group_services",
+            name = "bootstrap_group_servers",
             joinColumns = @JoinColumn(name = "bootstrap_group_id")
     )
-    @Column(name = "service", nullable = false)
-    private List<String> bootstrapServices;
+    @Column(name = "server", nullable = false)
+    private List<String> bootstrapServers;
     @Column(name = "created_at", nullable = false)
     private ZonedDateTime createdAt;
     @Column(name = "modified_at", nullable = false)

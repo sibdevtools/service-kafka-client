@@ -40,6 +40,7 @@ dependencies {
 
     implementation(libs.mapstruct)
     implementation(libs.mapstruct.lombok.binding)
+    implementation(libs.kafka.clients)
 
     implementation(libs.bundles.service.api)
 
