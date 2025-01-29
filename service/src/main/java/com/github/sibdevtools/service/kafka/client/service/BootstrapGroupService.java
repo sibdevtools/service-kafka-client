@@ -1,6 +1,7 @@
 package com.github.sibdevtools.service.kafka.client.service;
 
 import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupDto;
+import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupRsDto;
 import com.github.sibdevtools.service.kafka.client.entity.BootstrapGroupEntity;
 import com.github.sibdevtools.service.kafka.client.repository.BootstrapGroupRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -43,13 +44,15 @@ public class BootstrapGroupService {
         repository.save(entity);
     }
 
-    public BootstrapGroupEntity get(long id) {
+    public BootstrapGroupRsDto get(long id) {
         return repository.findById(id)
+                .map(BootstrapGroupRsDto::new)
                 .orElseThrow(() -> new RuntimeException("Bootstrap group '%d' not found".formatted(id)));
     }
 
-    public BootstrapGroupEntity getByCode(String code) {
+    public BootstrapGroupRsDto getByCode(String code) {
         return repository.findByCode(code)
+                .map(BootstrapGroupRsDto::new)
                 .orElseThrow(() -> new RuntimeException("Bootstrap group '%s' not found".formatted(code)));
     }
 

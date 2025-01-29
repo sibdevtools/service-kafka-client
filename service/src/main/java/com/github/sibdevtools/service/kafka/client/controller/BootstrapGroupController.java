@@ -3,6 +3,7 @@ package com.github.sibdevtools.service.kafka.client.controller;
 import com.github.sibdevtools.common.api.rs.StandardBodyRs;
 import com.github.sibdevtools.common.api.rs.StandardRs;
 import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupDto;
+import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupRsDto;
 import com.github.sibdevtools.service.kafka.client.api.dto.MessageDto;
 import com.github.sibdevtools.service.kafka.client.api.dto.TopicDescriptionDto;
 import com.github.sibdevtools.service.kafka.client.entity.BootstrapGroupEntity;
@@ -45,18 +46,20 @@ public class BootstrapGroupController {
     }
 
     @GetMapping("/{id}")
-    public BootstrapGroupEntity get(
+    public StandardBodyRs<BootstrapGroupRsDto> get(
             @PathVariable("id") String rawId
     ) {
         var id = Long.parseLong(rawId);
-        return bootstrapGroupService.get(id);
+        var rs = bootstrapGroupService.get(id);
+        return new StandardBodyRs<>(rs);
     }
 
     @GetMapping("/byCode/{code}")
-    public BootstrapGroupEntity getByCode(
+    public StandardBodyRs<BootstrapGroupRsDto> getByCode(
             @PathVariable("code") String code
     ) {
-        return bootstrapGroupService.getByCode(code);
+        var rs = bootstrapGroupService.getByCode(code);
+        return new StandardBodyRs<>(rs);
     }
 
     @GetMapping("/{id}/ping")
