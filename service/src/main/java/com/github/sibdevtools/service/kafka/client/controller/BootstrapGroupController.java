@@ -6,7 +6,6 @@ import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupDto;
 import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupRsDto;
 import com.github.sibdevtools.service.kafka.client.api.dto.MessageDto;
 import com.github.sibdevtools.service.kafka.client.api.dto.TopicDescriptionDto;
-import com.github.sibdevtools.service.kafka.client.entity.BootstrapGroupEntity;
 import com.github.sibdevtools.service.kafka.client.service.BootstrapGroupService;
 import org.springframework.web.bind.annotation.*;
 
@@ -96,10 +95,14 @@ public class BootstrapGroupController {
     @GetMapping("/{id}/{topic}/messages")
     public StandardBodyRs<ArrayList<MessageDto>> getMessages(
             @PathVariable("id") String rawId,
-            @PathVariable("topic") String topic
+            @PathVariable("topic") String topic,
+            @RequestParam(value = "maxMessages", required = false, defaultValue = "10") Integer rawMaxMessages,
+            @RequestParam(value = "maxTimeout", required = false, defaultValue = "5000") Long rawMaxTimeout
     ) {
         var id = Long.parseLong(rawId);
-        var body = bootstrapGroupService.getMessages(id, topic, 10, 30000)
+        var maxMessages = rawMaxMessages == null ? 10 : Math.min(rawMaxMessages, 1000);
+        var maxTimeout = rawMaxTimeout == null ? 5000 : Math.min(rawMaxTimeout, 60000);
+        var body = bootstrapGroupService.getMessages(id, topic, maxMessages, maxTimeout)
                 .orElseThrow(() -> new RuntimeException("Bootstrap group '%d' not found".formatted(id)))
                 .stream()
                 .map(MessageDto::new)
@@ -110,10 +113,14 @@ public class BootstrapGroupController {
     @GetMapping("/{id}/{topic}/lastMessages")
     public StandardBodyRs<ArrayList<MessageDto>> getLastNMessages(
             @PathVariable("id") String rawId,
-            @PathVariable("topic") String topic
+            @PathVariable("topic") String topic,
+            @RequestParam(value = "maxMessages", required = false, defaultValue = "10") Integer rawMaxMessages,
+            @RequestParam(value = "maxTimeout", required = false, defaultValue = "5000") Long rawMaxTimeout
     ) {
         var id = Long.parseLong(rawId);
-        var body = bootstrapGroupService.getLastNMessages(id, topic, 10, 30000)
+        var maxMessages = rawMaxMessages == null ? 10 : Math.min(rawMaxMessages, 1000);
+        var maxTimeout = rawMaxTimeout == null ? 5000 : Math.min(rawMaxTimeout, 60000);
+        var body = bootstrapGroupService.getLastNMessages(id, topic, maxMessages, maxTimeout)
                 .orElseThrow(() -> new RuntimeException("Bootstrap group '%d' not found".formatted(id)))
                 .stream()
                 .map(MessageDto::new)
