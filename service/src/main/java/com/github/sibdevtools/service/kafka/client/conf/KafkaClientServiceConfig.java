@@ -34,7 +34,7 @@ import java.util.Map;
 )
 @Configuration
 @PropertySource("classpath:/service/kafka/client/application.properties")
-public class KafkaClientServiceEmbeddedConfig {
+public class KafkaClientServiceConfig {
 
     @Bean("kafkaClientServiceObjectMapper")
     public ObjectMapper kafkaClientServiceObjectMapper() {
@@ -49,7 +49,7 @@ public class KafkaClientServiceEmbeddedConfig {
 
     @Bean
     public Flyway kafkaClientServiceFlyway(
-            KafkaClientServiceEmbeddedFlywayProperties configuration,
+            KafkaClientServiceFlywayProperties configuration,
             DataSource dataSource
     ) {
         return Flyway.configure()

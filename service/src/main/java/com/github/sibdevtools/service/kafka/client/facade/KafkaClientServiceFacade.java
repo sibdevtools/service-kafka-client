@@ -1,14 +1,18 @@
 package com.github.sibdevtools.service.kafka.client.facade;
 
+import com.github.sibdevtools.error.exception.ServiceException;
 import com.github.sibdevtools.service.kafka.client.api.dto.*;
 import com.github.sibdevtools.service.kafka.client.api.rq.SendMessageRq;
+import com.github.sibdevtools.service.kafka.client.constant.Constant;
 import com.github.sibdevtools.service.kafka.client.service.BootstrapGroupService;
 import com.github.sibdevtools.service.kafka.client.service.MessageConsumerService;
 import com.github.sibdevtools.service.kafka.client.service.MessagePublisherService;
+import com.github.sibdevtools.service.kafka.client.service.TemplateMessageService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
@@ -21,15 +25,18 @@ public class KafkaClientServiceFacade {
     private final BootstrapGroupService bootstrapGroupService;
     private final MessageConsumerService messageConsumerService;
     private final MessagePublisherService messagePublisherService;
+    private final TemplateMessageService templateMessageService;
 
     public KafkaClientServiceFacade(
             BootstrapGroupService bootstrapGroupService,
             MessageConsumerService messageConsumerService,
-            MessagePublisherService messagePublisherService
+            MessagePublisherService messagePublisherService,
+            TemplateMessageService templateMessageService
     ) {
         this.bootstrapGroupService = bootstrapGroupService;
         this.messageConsumerService = messageConsumerService;
         this.messagePublisherService = messagePublisherService;
+        this.templateMessageService = templateMessageService;
     }
 
     public void createBootstrapGroup(
@@ -43,6 +50,12 @@ public class KafkaClientServiceFacade {
             BootstrapGroupDto rq
     ) {
         bootstrapGroupService.update(id, rq);
+    }
+
+    public void deleteBootstrapGroup(
+            long id
+    ) {
+        bootstrapGroupService.delete(id);
     }
 
     public BootstrapGroupRsDto getBootstrapGroup(
@@ -67,7 +80,7 @@ public class KafkaClientServiceFacade {
             long id
     ) {
         return bootstrapGroupService.getTopicNames(id)
-                .orElseThrow(() -> new RuntimeException("Can't get topic"));
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "TOPICS_NOT_FOUND", "Can't get topic names"));
     }
 
     public TopicDescriptionDto getTopicDescription(
@@ -76,7 +89,7 @@ public class KafkaClientServiceFacade {
     ) {
         return bootstrapGroupService.getTopicDescription(id, topic)
                 .map(TopicDescriptionDto::new)
-                .orElseThrow(() -> new RuntimeException("Can't get partitions"));
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "TOPIC_DESCRIPTION_NOT_FOUND", "Can't get topic description"));
     }
 
     public List<MessageDto> getMessages(
@@ -86,7 +99,7 @@ public class KafkaClientServiceFacade {
             Long maxTimeout
     ) {
         return messageConsumerService.getMessages(id, topic, maxMessages, maxTimeout)
-                .orElseThrow(() -> new RuntimeException("Can't get messages"))
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "READ_ERROR", "Can't get messages"))
                 .stream()
                 .map(MessageDto::new)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -99,7 +112,7 @@ public class KafkaClientServiceFacade {
             Long maxTimeout
     ) {
         return messageConsumerService.getLastNMessages(id, topic, maxMessages, maxTimeout)
-                .orElseThrow(() -> new RuntimeException("Can't get last messages"))
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "READ_ERROR", "Can't get last messages"))
                 .stream()
                 .map(MessageDto::new)
                 .collect(Collectors.toCollection(ArrayList::new));
@@ -122,6 +135,45 @@ public class KafkaClientServiceFacade {
 
                 )
                 .map(RecordMetadataDto::new)
-                .orElseThrow(() -> new RuntimeException("Can't get send message"));
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "SEND_ERROR", "Can't send message"));
+    }
+
+    public void createMessageTemplate(
+            MessageTemplateDto rq
+    ) {
+        templateMessageService.create(rq);
+    }
+
+    public void updateMessageTemplate(
+            long id,
+            MessageTemplateDto rq
+    ) {
+        templateMessageService.update(id, rq);
+    }
+
+    public RecordMetadataDto sendMessageTemplate(
+            long id,
+            long bootstrapGroupId,
+            String topic,
+            Integer partition,
+            Long timestamp,
+            byte[] key,
+            Map<String, Object> input,
+            Map<String, byte[]> headersMap,
+            Long maxTimeout
+    ) {
+        return templateMessageService.send(
+                        id,
+                        bootstrapGroupId,
+                        topic,
+                        partition,
+                        timestamp,
+                        key,
+                        input,
+                        headersMap,
+                        maxTimeout
+                )
+                .map(RecordMetadataDto::new)
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "SEND_ERROR", "Can't send message"));
     }
 }

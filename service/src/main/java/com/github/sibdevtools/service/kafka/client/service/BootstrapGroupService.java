@@ -3,6 +3,7 @@ package com.github.sibdevtools.service.kafka.client.service;
 import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupDto;
 import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupRsDto;
 import com.github.sibdevtools.service.kafka.client.entity.BootstrapGroupEntity;
+import com.github.sibdevtools.service.kafka.client.exception.BootstrapGroupNotFoundException;
 import com.github.sibdevtools.service.kafka.client.repository.BootstrapGroupRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -42,18 +43,18 @@ public class BootstrapGroupService {
     public BootstrapGroupRsDto get(long id) {
         return repository.findById(id)
                 .map(BootstrapGroupRsDto::new)
-                .orElseThrow(() -> new RuntimeException("Bootstrap group '%d' not found".formatted(id)));
+                .orElseThrow(() -> new BootstrapGroupNotFoundException(id));
     }
 
     public BootstrapGroupRsDto getByCode(String code) {
         return repository.findByCode(code)
                 .map(BootstrapGroupRsDto::new)
-                .orElseThrow(() -> new RuntimeException("Bootstrap group '%s' not found".formatted(code)));
+                .orElseThrow(() -> new BootstrapGroupNotFoundException(code));
     }
 
     public void update(long id, BootstrapGroupDto rq) {
         var entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Bootstrap group not found"));
+                .orElseThrow(() -> new BootstrapGroupNotFoundException(id));
 
         entity.setCode(rq.getCode());
         entity.setName(rq.getName());
@@ -62,6 +63,10 @@ public class BootstrapGroupService {
         entity.setModifiedAt(ZonedDateTime.now());
 
         repository.save(entity);
+    }
+
+    public void delete(long id) {
+        repository.deleteById(id);
     }
 
     public boolean ping(long id) {

@@ -21,6 +21,9 @@ dependencies {
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
+    implementation(libs.storage.embedded)
+    implementation(libs.async.embedded)
+
     implementation(libs.spring.openapi.starter)
 
     implementation("com.h2database:h2")

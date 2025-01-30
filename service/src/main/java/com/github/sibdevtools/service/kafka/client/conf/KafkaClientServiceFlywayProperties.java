@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 @NoArgsConstructor
 @AllArgsConstructor
 @ConfigurationProperties("spring.flyway.service-kafka-client")
-public class KafkaClientServiceEmbeddedFlywayProperties {
+public class KafkaClientServiceFlywayProperties {
     private String encoding;
     private String[] locations;
     private String schema;

@@ -19,3 +19,18 @@ CREATE TABLE bootstrap_group_servers
     server             VARCHAR(512) NOT NULL,
     FOREIGN KEY (bootstrap_group_id) REFERENCES bootstrap_group (id)
 );
+
+CREATE TABLE message_template
+(
+    id                    BIGINT                  NOT NULL AUTO_INCREMENT,
+    code                  VARCHAR_IGNORECASE(255) NOT NULL UNIQUE,
+    name                  VARCHAR(512)            NOT NULL,
+    engine                VARCHAR(32)             NOT NULL,
+    template_storage_type VARCHAR(64)             NOT NULL,
+    template_storage_id   VARCHAR(128)            NOT NULL,
+    schema_storage_type   VARCHAR(64)             NOT NULL,
+    schema_storage_id     VARCHAR(128)            NOT NULL,
+    created_at            TIMESTAMP               NOT NULL,
+    modified_at           TIMESTAMP               NOT NULL,
+    CONSTRAINT message_template_pk PRIMARY KEY (id)
+);

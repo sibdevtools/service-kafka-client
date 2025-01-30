@@ -42,6 +42,15 @@ public class KafkaClientServiceController {
         return new StandardRs();
     }
 
+    @DeleteMapping("/{id}")
+    public StandardRs delete(
+            @PathVariable("id") String rawId
+    ) {
+        var id = Long.parseLong(rawId);
+        kafkaClientServiceFacade.deleteBootstrapGroup(id);
+        return new StandardRs();
+    }
+
     @GetMapping("/{id}")
     public StandardBodyRs<BootstrapGroupRsDto> get(
             @PathVariable("id") String rawId
