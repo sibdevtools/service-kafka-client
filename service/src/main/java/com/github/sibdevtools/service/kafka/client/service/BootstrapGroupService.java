@@ -11,7 +11,13 @@ import org.apache.kafka.clients.admin.TopicDescription;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
+import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -136,7 +142,12 @@ public class BootstrapGroupService {
         }
     }
 
-    public Optional<List<ConsumerRecord<byte[], byte[]>>> getMessages(long id, String topic, int maxMessages, long maxTimeout) {
+    public Optional<List<ConsumerRecord<byte[], byte[]>>> getMessages(
+            long id,
+            String topic,
+            int maxMessages,
+            long maxTimeout
+    ) {
         var timer = System.currentTimeMillis();
         var entity = get(id);
         var bootstrapServers = String.join(",", entity.getBootstrapServers());
@@ -173,7 +184,12 @@ public class BootstrapGroupService {
         return Optional.of(messages);
     }
 
-    public Optional<List<ConsumerRecord<byte[], byte[]>>> getLastNMessages(long id, String topic, int maxMessages, long maxTimeout) {
+    public Optional<List<ConsumerRecord<byte[], byte[]>>> getLastNMessages(
+            long id,
+            String topic,
+            int maxMessages,
+            long maxTimeout
+    ) {
         var timer = System.currentTimeMillis();
         var entity = get(id);
         var bootstrapServers = String.join(",", entity.getBootstrapServers());
@@ -223,4 +239,44 @@ public class BootstrapGroupService {
         return Optional.of(messages);
     }
 
+    public Optional<RecordMetadata> sendMessage(
+            long id,
+            String topic,
+            Integer partition,
+            Long timestamp,
+            byte[] key,
+            byte[] value,
+            Map<String, byte[]> headersMap,
+            long maxTimeout
+    ) {
+        var entity = get(id);
+        var bootstrapServers = String.join(",", entity.getBootstrapServers());
+
+        var properties = new Properties();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+        properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
+        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "kafka-client-service" + UUID.randomUUID());
+
+        var headers = new RecordHeaders();
+        if (headersMap != null) {
+            for (var entry : headersMap.entrySet()) {
+                headers.add(entry.getKey(), entry.getValue());
+            }
+        }
+
+        try (var producer = new KafkaProducer<byte[], byte[]>(properties)) {
+            var producerRecord = new ProducerRecord<>(topic, partition, timestamp, key, value, headers);
+            var metadataFuture = producer.send(producerRecord);
+            var recordMetadata = metadataFuture.get(maxTimeout, TimeUnit.MILLISECONDS);
+            return Optional.ofNullable(recordMetadata);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("Can't send message", e);
+            return Optional.empty();
+        } catch (Exception e) {
+            log.error("Can't send message", e);
+            return Optional.empty();
+        }
+    }
 }

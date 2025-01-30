@@ -2,10 +2,8 @@ package com.github.sibdevtools.service.kafka.client.controller;
 
 import com.github.sibdevtools.common.api.rs.StandardBodyRs;
 import com.github.sibdevtools.common.api.rs.StandardRs;
-import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupDto;
-import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupRsDto;
-import com.github.sibdevtools.service.kafka.client.api.dto.MessageDto;
-import com.github.sibdevtools.service.kafka.client.api.dto.TopicDescriptionDto;
+import com.github.sibdevtools.service.kafka.client.api.dto.*;
+import com.github.sibdevtools.service.kafka.client.api.rq.SendMessageRq;
 import com.github.sibdevtools.service.kafka.client.service.BootstrapGroupService;
 import org.springframework.web.bind.annotation.*;
 
@@ -125,6 +123,29 @@ public class BootstrapGroupController {
                 .stream()
                 .map(MessageDto::new)
                 .collect(Collectors.toCollection(ArrayList::new));
+        return new StandardBodyRs<>(body);
+    }
+
+    @PostMapping("/{id}/{topic}/message")
+    public StandardBodyRs<RecordMetadataDto> sendMessage(
+            @PathVariable("id") String rawId,
+            @PathVariable("topic") String topic,
+            @RequestBody SendMessageRq rq
+    ) {
+        var id = Long.parseLong(rawId);
+        var body = bootstrapGroupService.sendMessage(
+                        id,
+                        topic,
+                        rq.getPartition(),
+                        rq.getTimestamp(),
+                        rq.getKey(),
+                        rq.getValue(),
+                        rq.getHeaders(),
+                        rq.getMaxTimeout()
+
+                )
+                .map(RecordMetadataDto::new)
+                .orElseThrow(() -> new RuntimeException("Bootstrap group '%d' not found".formatted(id)));
         return new StandardBodyRs<>(body);
     }
 
