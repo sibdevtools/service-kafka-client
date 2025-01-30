@@ -1,10 +1,10 @@
 package com.github.sibdevtools.service.kafka.client.service;
 
+import com.github.sibdevtools.service.kafka.client.api.dto.RecordMetadataDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.springframework.stereotype.Service;
@@ -41,7 +41,7 @@ public class MessagePublisherService {
      * @param maxTimeout max send timeout in milliseconds
      * @return data about sent message metadata or empty optional if sending failed
      */
-    public Optional<RecordMetadata> sendMessage(
+    public Optional<RecordMetadataDto> sendMessage(
             long id,
             String topic,
             Integer partition,
@@ -73,7 +73,8 @@ public class MessagePublisherService {
             var producerRecord = new ProducerRecord<>(topic, partition, timestamp, key, value, headers);
             var metadataFuture = producer.send(producerRecord);
             var recordMetadata = metadataFuture.get(maxTimeout, TimeUnit.MILLISECONDS);
-            return Optional.ofNullable(recordMetadata);
+            return Optional.ofNullable(recordMetadata)
+                    .map(RecordMetadataDto::new);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("Can't send message", e);

@@ -2,13 +2,14 @@ package com.github.sibdevtools.service.kafka.client.service;
 
 import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupDto;
 import com.github.sibdevtools.service.kafka.client.api.dto.BootstrapGroupRsDto;
+import com.github.sibdevtools.service.kafka.client.api.dto.TopicDescriptionDto;
 import com.github.sibdevtools.service.kafka.client.entity.BootstrapGroupEntity;
 import com.github.sibdevtools.service.kafka.client.exception.BootstrapGroupNotFoundException;
 import com.github.sibdevtools.service.kafka.client.repository.BootstrapGroupRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;
-import org.apache.kafka.clients.admin.TopicDescription;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -28,7 +29,14 @@ public class BootstrapGroupService {
         this.repository = repository;
     }
 
-    public void create(BootstrapGroupDto rq) {
+    public List<BootstrapGroupRsDto> getAll() {
+        return repository.findAll(Sort.by("id"))
+                .stream()
+                .map(BootstrapGroupRsDto::new)
+                .toList();
+    }
+
+    public long create(BootstrapGroupDto rq) {
         var entity = BootstrapGroupEntity.builder()
                 .code(rq.getCode())
                 .name(rq.getName())
@@ -38,6 +46,7 @@ public class BootstrapGroupService {
                 .modifiedAt(ZonedDateTime.now())
                 .build();
         repository.save(entity);
+        return entity.getId();
     }
 
     public BootstrapGroupRsDto get(long id) {
@@ -113,7 +122,7 @@ public class BootstrapGroupService {
         }
     }
 
-    public Optional<TopicDescription> getTopicDescription(long id, String topic) {
+    public Optional<TopicDescriptionDto> getTopicDescription(long id, String topic) {
         var entity = get(id);
         var bootstrapServers = String.join(",", entity.getBootstrapServers());
 
@@ -125,7 +134,8 @@ public class BootstrapGroupService {
             var topicNameValues = described.topicNameValues();
             var topicDescriptionKafkaFuture = topicNameValues.get(topic);
             var topicDescription = topicDescriptionKafkaFuture.get(entity.getMaxTimeout(), TimeUnit.MILLISECONDS);
-            return Optional.of(topicDescription);
+            return Optional.of(topicDescription)
+                    .map(TopicDescriptionDto::new);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("Can't ping bootstrap group", e);

@@ -8,6 +8,9 @@ import com.github.sibdevtools.async.api.service.AsyncTaskService;
 import com.github.sibdevtools.error.exception.ServiceException;
 import com.github.sibdevtools.service.kafka.client.api.dto.MessageTemplateDto;
 import com.github.sibdevtools.service.kafka.client.api.dto.MessageTemplateRsDto;
+import com.github.sibdevtools.service.kafka.client.api.dto.MessageTemplateShortRsDto;
+import com.github.sibdevtools.service.kafka.client.api.dto.RecordMetadataDto;
+import com.github.sibdevtools.service.kafka.client.api.rq.SendTemplateMessageRq;
 import com.github.sibdevtools.service.kafka.client.constant.Constant;
 import com.github.sibdevtools.service.kafka.client.entity.MessageTemplateEntity;
 import com.github.sibdevtools.service.kafka.client.exception.MessageTemplateNotFoundException;
@@ -19,17 +22,13 @@ import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -69,6 +68,13 @@ public class TemplateMessageService {
         this.bucketCode = bucketCode;
         this.messagePublisherService = messagePublisherService;
         this.templateMessageEngineFacade = templateMessageEngineFacade;
+    }
+
+    public List<MessageTemplateShortRsDto> getAll() {
+        return repository.findAll()
+                .stream()
+                .map(MessageTemplateShortRsDto::new)
+                .toList();
     }
 
     public long create(MessageTemplateDto rq) {
@@ -172,6 +178,7 @@ public class TemplateMessageService {
     public void delete(long id) {
         var entity = repository.findById(id)
                 .orElse(null);
+
         if (entity == null) {
             return;
         }
@@ -182,16 +189,9 @@ public class TemplateMessageService {
         repository.delete(entity);
     }
 
-    public Optional<RecordMetadata> send(
+    public Optional<RecordMetadataDto> send(
             long id,
-            long bootstrapGroupId,
-            String topic,
-            Integer partition,
-            Long timestamp,
-            byte[] key,
-            Map<String, Object> input,
-            Map<String, byte[]> headersMap,
-            Long maxTimeout
+            SendTemplateMessageRq rq
     ) {
         var entity = repository.findById(id)
                 .orElseThrow(() -> new MessageTemplateNotFoundException(id));
@@ -203,6 +203,7 @@ public class TemplateMessageService {
         var schemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
         var schema = schemaFactory.getSchema(schemaNode);
 
+        var input = rq.getInput();
         var dataNode = objectMapper.convertValue(input, JsonNode.class);
 
         var validationResult = schema.validate(dataNode);
@@ -222,14 +223,14 @@ public class TemplateMessageService {
         var payload = templateMessageEngineFacade.render(entity.getEngine(), template, input);
 
         return messagePublisherService.sendMessage(
-                bootstrapGroupId,
-                topic,
-                partition,
-                timestamp,
-                key,
+                rq.getBootstrapGroupId(),
+                rq.getTopic(),
+                rq.getPartition(),
+                rq.getTimestamp(),
+                rq.getKey(),
                 payload,
-                headersMap,
-                maxTimeout
+                rq.getHeaders(),
+                rq.getMaxTimeout()
         );
     }
 
@@ -294,5 +295,4 @@ public class TemplateMessageService {
             throw new ServiceException(Constant.ERROR_SOURCE, "ASYNC_SERVICE_ERROR", "Failed to schedule cleanup task");
         }
     }
-
 }

@@ -2,13 +2,20 @@ package com.github.sibdevtools.service.kafka.client.controller;
 
 import com.github.sibdevtools.common.api.rs.StandardBodyRs;
 import com.github.sibdevtools.common.api.rs.StandardRs;
+import com.github.sibdevtools.error.exception.ServiceException;
 import com.github.sibdevtools.service.kafka.client.api.dto.*;
 import com.github.sibdevtools.service.kafka.client.api.rq.SendMessageRq;
-import com.github.sibdevtools.service.kafka.client.facade.KafkaClientServiceFacade;
+import com.github.sibdevtools.service.kafka.client.constant.Constant;
+import com.github.sibdevtools.service.kafka.client.service.BootstrapGroupService;
+import com.github.sibdevtools.service.kafka.client.service.MessageConsumerService;
+import com.github.sibdevtools.service.kafka.client.service.MessagePublisherService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * @author sibmaks
@@ -16,20 +23,24 @@ import java.util.TreeSet;
  */
 @RestController
 @RequestMapping("/kafka-client-service/bootstrap-group")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class KafkaClientServiceController {
-    private final KafkaClientServiceFacade kafkaClientServiceFacade;
+    private final BootstrapGroupService bootstrapGroupService;
+    private final MessageConsumerService messageConsumerService;
+    private final MessagePublisherService messagePublisherService;
 
-    public KafkaClientServiceController(
-            KafkaClientServiceFacade kafkaClientServiceFacade) {
-        this.kafkaClientServiceFacade = kafkaClientServiceFacade;
+    @GetMapping("/")
+    public StandardBodyRs<ArrayList<BootstrapGroupRsDto>> getAll() {
+        var body = bootstrapGroupService.getAll();
+        return new StandardBodyRs<>(new ArrayList<>(body));
     }
 
     @PostMapping("/")
-    public StandardRs create(
+    public StandardBodyRs<Long> create(
             @RequestBody BootstrapGroupDto rq
     ) {
-        kafkaClientServiceFacade.createBootstrapGroup(rq);
-        return new StandardRs();
+        var body = bootstrapGroupService.create(rq);
+        return new StandardBodyRs<>(body);
     }
 
     @PutMapping("/{id}")
@@ -38,7 +49,7 @@ public class KafkaClientServiceController {
             @PathVariable("id") String rawId
     ) {
         var id = Long.parseLong(rawId);
-        kafkaClientServiceFacade.updateBootstrapGroup(id, rq);
+        bootstrapGroupService.update(id, rq);
         return new StandardRs();
     }
 
@@ -47,7 +58,7 @@ public class KafkaClientServiceController {
             @PathVariable("id") String rawId
     ) {
         var id = Long.parseLong(rawId);
-        kafkaClientServiceFacade.deleteBootstrapGroup(id);
+        bootstrapGroupService.delete(id);
         return new StandardRs();
     }
 
@@ -56,15 +67,7 @@ public class KafkaClientServiceController {
             @PathVariable("id") String rawId
     ) {
         var id = Long.parseLong(rawId);
-        var body = kafkaClientServiceFacade.getBootstrapGroup(id);
-        return new StandardBodyRs<>(body);
-    }
-
-    @GetMapping("/byCode/{code}")
-    public StandardBodyRs<BootstrapGroupRsDto> getByCode(
-            @PathVariable("code") String code
-    ) {
-        var body = kafkaClientServiceFacade.getBootstrapGroupByCode(code);
+        var body = bootstrapGroupService.get(id);
         return new StandardBodyRs<>(body);
     }
 
@@ -73,7 +76,7 @@ public class KafkaClientServiceController {
             @PathVariable("id") String rawId
     ) {
         var id = Long.parseLong(rawId);
-        var body = kafkaClientServiceFacade.ping(id);
+        var body = bootstrapGroupService.ping(id);
         return new StandardBodyRs<>(body);
     }
 
@@ -82,7 +85,8 @@ public class KafkaClientServiceController {
             @PathVariable("id") String rawId
     ) {
         var id = Long.parseLong(rawId);
-        var body = kafkaClientServiceFacade.getTopicNames(id);
+        var body = bootstrapGroupService.getTopicNames(id)
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "TOPICS_NOT_FOUND", "Can't get topic names"));
         return new StandardBodyRs<>(new TreeSet<>(body));
     }
 
@@ -92,7 +96,8 @@ public class KafkaClientServiceController {
             @PathVariable("topic") String topic
     ) {
         var id = Long.parseLong(rawId);
-        var body = kafkaClientServiceFacade.getTopicDescription(id, topic);
+        var body = bootstrapGroupService.getTopicDescription(id, topic)
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "TOPIC_DESCRIPTION_NOT_FOUND", "Can't get topic description"));
         return new StandardBodyRs<>(body);
     }
 
@@ -105,8 +110,12 @@ public class KafkaClientServiceController {
     ) {
         var id = Long.parseLong(rawId);
         var maxMessages = rawMaxMessages == null ? 10 : Math.min(rawMaxMessages, 1000);
-        var body = kafkaClientServiceFacade.getMessages(id, topic, maxMessages, maxTimeout);
-        return new StandardBodyRs<>(new ArrayList<>(body));
+        var body = messageConsumerService.getMessages(id, topic, maxMessages, maxTimeout)
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "READ_ERROR", "Can't get messages"))
+                .stream()
+                .map(MessageDto::new)
+                .collect(Collectors.toCollection(ArrayList::new));
+        return new StandardBodyRs<>(body);
     }
 
     @GetMapping("/{id}/{topic}/lastMessages")
@@ -118,7 +127,11 @@ public class KafkaClientServiceController {
     ) {
         var id = Long.parseLong(rawId);
         var maxMessages = rawMaxMessages == null ? 10 : Math.min(rawMaxMessages, 1000);
-        var body = kafkaClientServiceFacade.getLastNMessages(id, topic, maxMessages, maxTimeout);
+        var body = messageConsumerService.getLastNMessages(id, topic, maxMessages, maxTimeout)
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "READ_ERROR", "Can't get last messages"))
+                .stream()
+                .map(MessageDto::new)
+                .collect(Collectors.toCollection(ArrayList::new));
         return new StandardBodyRs<>(new ArrayList<>(body));
     }
 
@@ -129,11 +142,18 @@ public class KafkaClientServiceController {
             @RequestBody SendMessageRq rq
     ) {
         var id = Long.parseLong(rawId);
-        var body = kafkaClientServiceFacade.sendMessage(
-                id,
-                topic,
-                rq
-        );
+        var body = messagePublisherService.sendMessage(
+                        id,
+                        topic,
+                        rq.getPartition(),
+                        rq.getTimestamp(),
+                        rq.getKey(),
+                        rq.getValue(),
+                        rq.getHeaders(),
+                        rq.getMaxTimeout()
+
+                )
+                .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "SEND_ERROR", "Can't send message"));
         return new StandardBodyRs<>(body);
     }
 
