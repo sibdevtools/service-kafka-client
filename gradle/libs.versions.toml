@@ -5,12 +5,12 @@ spring-framework = "3.3.3"
 spring-openapi-doc = "2.6.0"
 spring-dependency-managment = "1.1.6"
 
-graalvm = "24.1.0"
 mapstruct = "1.6.2"
 mapstruct-lombok-binding = "0.2.0"
 kafka-clients = "3.9.0"
 json-schema-validator = "1.5.5"
 jte = "3.1.16"
+freemarker = "2.3.34"
 
 # service APIs deps
 common-api = "0.0.2"
@@ -34,16 +34,13 @@ async-embedded = { module = "com.github.sibdevtools:service-async-embedded", ver
 
 spring-openapi-starter = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-openapi-doc" }
 
-graalvm-js = { module = "org.graalvm.js:js", version.ref = "graalvm" }
-graalvm-js-scriptengine = { module = "org.graalvm.js:js-scriptengine", version.ref = "graalvm" }
-graalvm-python = { module = "org.graalvm.python:python", version.ref = "graalvm" }
-
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
 mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
 mapstruct-lombok-binding = { module = "org.projectlombok:lombok-mapstruct-binding", version.ref = "mapstruct-lombok-binding" }
 
 json-schema-validator = {module = "com.networknt:json-schema-validator", version.ref = "json-schema-validator"}
 jte = {module = "gg.jte:jte", version.ref = "jte"}
+freemarker = {module = "org.freemarker:freemarker", version.ref = "freemarker"}
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka-clients" }
 
@@ -54,11 +51,6 @@ service-api = [
     "error-api",
     "storage-api",
     "async-api"
-]
-graalvm = [
-    "graalvm-js",
-    "graalvm-js-scriptengine",
-    "graalvm-python"
 ]
 
 [plugins]

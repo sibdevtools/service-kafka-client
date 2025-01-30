@@ -36,12 +36,11 @@ dependencies {
     implementation("jakarta.annotation:jakarta.annotation-api")
     implementation("jakarta.persistence:jakarta.persistence-api")
 
-    implementation(libs.bundles.graalvm)
-
     implementation(libs.mapstruct)
     implementation(libs.mapstruct.lombok.binding)
     implementation(libs.json.schema.validator)
     implementation(libs.jte)
+    implementation(libs.freemarker)
     implementation(libs.kafka.clients)
 
     implementation(libs.bundles.service.api)

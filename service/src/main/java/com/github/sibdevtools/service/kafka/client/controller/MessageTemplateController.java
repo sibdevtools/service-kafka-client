@@ -26,8 +26,8 @@ public class MessageTemplateController {
     public StandardRs create(
             @RequestBody MessageTemplateDto rq
     ) {
-        kafkaClientServiceFacade.createMessageTemplate(rq);
-        return new StandardRs();
+        var body = kafkaClientServiceFacade.createMessageTemplate(rq);
+        return new StandardBodyRs<>(body);
     }
 
     @PutMapping("/{id}")

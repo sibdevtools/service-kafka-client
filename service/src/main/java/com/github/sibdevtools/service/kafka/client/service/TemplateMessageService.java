@@ -12,7 +12,7 @@ import com.github.sibdevtools.service.kafka.client.constant.Constant;
 import com.github.sibdevtools.service.kafka.client.entity.MessageTemplateEntity;
 import com.github.sibdevtools.service.kafka.client.exception.MessageTemplateNotFoundException;
 import com.github.sibdevtools.service.kafka.client.repository.MessageTemplateRepository;
-import com.github.sibdevtools.service.kafka.client.template.JavaTemplateEngineTemplateMessageEngine;
+import com.github.sibdevtools.service.kafka.client.template.TemplateMessageEngineFacade;
 import com.github.sibdevtools.storage.api.rq.SaveFileRq;
 import com.github.sibdevtools.storage.api.service.StorageService;
 import com.networknt.schema.JsonSchemaFactory;
@@ -49,7 +49,7 @@ public class TemplateMessageService {
     private final ObjectMapper objectMapper;
     private final String bucketCode;
     private final MessagePublisherService messagePublisherService;
-    private final JavaTemplateEngineTemplateMessageEngine javaTemplateEngineTemplateMessageEngine;
+    private final TemplateMessageEngineFacade templateMessageEngineFacade;
 
     public TemplateMessageService(
             AsyncTaskService asyncTaskService,
@@ -60,7 +60,7 @@ public class TemplateMessageService {
             @Value("${kafka.client.service.props.bucket.code}")
             String bucketCode,
             MessagePublisherService messagePublisherService,
-            JavaTemplateEngineTemplateMessageEngine javaTemplateEngineTemplateMessageEngine
+            TemplateMessageEngineFacade templateMessageEngineFacade
     ) {
         this.asyncTaskService = asyncTaskService;
         this.storageService = storageService;
@@ -68,10 +68,10 @@ public class TemplateMessageService {
         this.objectMapper = objectMapper;
         this.bucketCode = bucketCode;
         this.messagePublisherService = messagePublisherService;
-        this.javaTemplateEngineTemplateMessageEngine = javaTemplateEngineTemplateMessageEngine;
+        this.templateMessageEngineFacade = templateMessageEngineFacade;
     }
 
-    public void create(MessageTemplateDto rq) {
+    public long create(MessageTemplateDto rq) {
         var schemaBytes = serializeSchema(rq);
 
         var schemaFileId = saveFile(rq, schemaBytes);
@@ -89,6 +89,7 @@ public class TemplateMessageService {
                 .modifiedAt(ZonedDateTime.now())
                 .build();
         repository.save(entity);
+        return entity.getId();
     }
 
     private byte[] serializeSchema(MessageTemplateDto rq) {
@@ -218,7 +219,7 @@ public class TemplateMessageService {
 
         var template = readTemplate(entity);
 
-        var payload = javaTemplateEngineTemplateMessageEngine.render(template, input);
+        var payload = templateMessageEngineFacade.render(entity.getEngine(), template, input);
 
         return messagePublisherService.sendMessage(
                 bootstrapGroupId,

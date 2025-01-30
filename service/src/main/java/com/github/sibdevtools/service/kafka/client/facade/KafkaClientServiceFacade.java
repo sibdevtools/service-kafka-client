@@ -138,10 +138,10 @@ public class KafkaClientServiceFacade {
                 .orElseThrow(() -> new ServiceException(Constant.ERROR_SOURCE, "SEND_ERROR", "Can't send message"));
     }
 
-    public void createMessageTemplate(
+    public long createMessageTemplate(
             MessageTemplateDto rq
     ) {
-        templateMessageService.create(rq);
+        return templateMessageService.create(rq);
     }
 
     public void updateMessageTemplate(

@@ -1,5 +1,7 @@
 package com.github.sibdevtools.service.kafka.client.template;
 
+import com.github.sibdevtools.error.exception.ServiceException;
+import com.github.sibdevtools.service.kafka.client.constant.Constant;
 import com.github.sibdevtools.service.kafka.client.entity.MessageEngine;
 import gg.jte.CodeResolver;
 import gg.jte.ContentType;
@@ -8,6 +10,7 @@ import gg.jte.output.StringOutput;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Map;
 
 /**
@@ -29,11 +32,16 @@ public class JavaTemplateEngineTemplateMessageEngine implements TemplateMessageE
                 return System.currentTimeMillis();
             }
         };
-        var templateEngine = TemplateEngine.create(codeResolver, ContentType.Plain);
+        var name = "%s-%d".formatted(Thread.currentThread().getName(), System.currentTimeMillis());
+        try {
+            var templateEngine = TemplateEngine.create(codeResolver, Files.createTempDirectory(name), ContentType.Plain);
 
-        var output = new StringOutput();
-        templateEngine.render("local", input, output);
-        return output.toString().getBytes(StandardCharsets.UTF_8);
+            var output = new StringOutput();
+            templateEngine.render(name, input, output);
+            return output.toString().getBytes(StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new ServiceException(Constant.ERROR_SOURCE, "TEMPLATE_ERROR", "Can't render template", e);
+        }
     }
 
     @Override
