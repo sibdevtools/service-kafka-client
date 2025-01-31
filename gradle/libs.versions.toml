@@ -1,9 +1,9 @@
 [versions]
 java = "21"
 
-spring-framework = "3.3.3"
+spring-framework = "3.4.1"
 spring-openapi-doc = "2.6.0"
-spring-dependency-managment = "1.1.6"
+spring-dependency-managment = "1.1.7"
 
 mapstruct = "1.6.2"
 mapstruct-lombok-binding = "0.2.0"
