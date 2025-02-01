@@ -21,6 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BootstrapGroupRsDto implements Serializable {
+    private long id;
     private String code;
     private String name;
     private Long maxTimeout;
@@ -31,6 +32,7 @@ public class BootstrapGroupRsDto implements Serializable {
     private ZonedDateTime modifiedAt;
 
     public BootstrapGroupRsDto(BootstrapGroupEntity entity) {
+        this.id = entity.getId();
         this.code = entity.getCode();
         this.name = entity.getName();
         this.maxTimeout = entity.getMaxTimeout();
