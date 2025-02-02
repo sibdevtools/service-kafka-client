@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 
 /**
  * @author sibmaks
@@ -28,6 +29,15 @@ public class MessageTemplateEntity {
     private String name;
     @Column(name = "engine", nullable = false)
     private MessageEngine engine;
+    @ElementCollection
+    @CollectionTable(
+            schema = "kafka_client_service",
+            name = "message_template_header",
+            joinColumns = @JoinColumn(name = "message_template_id")
+    )
+    @MapKeyColumn(name = "header_name")
+    @Column(name = "header_value", nullable = false)
+    private Map<String, String> headers;
     @Column(name = "template_storage_type", nullable = false)
     private String templateStorageType;
     @Column(name = "template_storage_id", nullable = false)

@@ -86,6 +86,7 @@ public class TemplateMessageService {
         var entity = MessageTemplateEntity.builder()
                 .code(rq.getCode())
                 .name(rq.getName())
+                .headers(rq.getHeaders())
                 .engine(rq.getEngine())
                 .schemaStorageType("LOCAL")
                 .schemaStorageId(schemaFileId)
@@ -169,6 +170,7 @@ public class TemplateMessageService {
 
         entity.setCode(rq.getCode());
         entity.setName(rq.getName());
+        entity.setHeaders(rq.getHeaders());
         entity.setEngine(rq.getEngine());
         entity.setModifiedAt(ZonedDateTime.now());
 

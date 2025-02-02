@@ -25,6 +25,7 @@ public class MessageTemplateRsDto implements Serializable {
     private String code;
     private String name;
     private MessageEngine engine;
+    private Map<String, String> headers;
     private Map<String, Object> schema;
     private byte[] template;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSS")
@@ -37,6 +38,7 @@ public class MessageTemplateRsDto implements Serializable {
         this.code = entity.getCode();
         this.name = entity.getName();
         this.engine = entity.getEngine();
+        this.headers = entity.getHeaders();
         this.schema = schema;
         this.template = template;
         this.createdAt = entity.getCreatedAt();
