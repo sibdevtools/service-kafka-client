@@ -49,6 +49,7 @@ public class TemplateMessageService {
     private final String bucketCode;
     private final MessagePublisherService messagePublisherService;
     private final TemplateMessageEngineFacade templateMessageEngineFacade;
+    private final Base64.Decoder decoder = Base64.getDecoder();
 
     public TemplateMessageService(
             AsyncTaskService asyncTaskService,
@@ -224,6 +225,20 @@ public class TemplateMessageService {
 
         var payload = templateMessageEngineFacade.render(entity.getEngine(), template, input);
 
+        var headers = new LinkedHashMap<String, byte[]>();
+        var entityHeaders = entity.getHeaders();
+        if (entityHeaders != null) {
+            for (var entry : entityHeaders.entrySet()) {
+                var base64Value = entry.getValue();
+                var rawValue = decoder.decode(base64Value);
+                headers.put(entry.getKey(), rawValue);
+            }
+        }
+        var rqHeaders = rq.getHeaders();
+        if (rqHeaders != null) {
+            headers.putAll(rqHeaders);
+        }
+
         return messagePublisherService.sendMessage(
                 rq.getBootstrapGroupId(),
                 rq.getTopic(),
@@ -231,7 +246,7 @@ public class TemplateMessageService {
                 rq.getTimestamp(),
                 rq.getKey(),
                 payload,
-                rq.getHeaders(),
+                headers,
                 rq.getMaxTimeout()
         );
     }

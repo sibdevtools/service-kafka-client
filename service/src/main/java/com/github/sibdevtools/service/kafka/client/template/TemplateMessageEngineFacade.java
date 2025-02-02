@@ -3,6 +3,7 @@ package com.github.sibdevtools.service.kafka.client.template;
 import com.github.sibdevtools.service.kafka.client.entity.MessageEngine;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class TemplateMessageEngineFacade {
         engines.forEach(engine -> messageEngines.put(engine.getEngine(), engine));
     }
 
-    public byte[] render(MessageEngine engine, byte[] template, Map<String, Object> input) {
+    public byte[] render(MessageEngine engine, byte[] template, Map<String, Serializable> input) {
         var templateMessageEngine = messageEngines.get(engine);
         return templateMessageEngine.render(template, input);
     }
