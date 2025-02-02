@@ -2,6 +2,7 @@ package com.github.sibdevtools.service.kafka.client.template;
 
 import com.github.sibdevtools.service.kafka.client.entity.MessageEngine;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -10,7 +11,7 @@ import java.util.Map;
  */
 public interface TemplateMessageEngine {
 
-    byte[] render(byte[] template, Map<String, Object> input);
+    byte[] render(byte[] template, Map<String, Serializable> input);
 
     MessageEngine getEngine();
 

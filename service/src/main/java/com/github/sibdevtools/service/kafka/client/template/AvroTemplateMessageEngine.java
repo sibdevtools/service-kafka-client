@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ import java.util.Map;
 @Component
 public class AvroTemplateMessageEngine implements TemplateMessageEngine {
     @Override
-    public byte[] render(byte[] template, Map<String, Object> input) {
+    public byte[] render(byte[] template, Map<String, Serializable> input) {
         var schemaParser = new SchemaParser();
         var schema = schemaParser.parse(new String(template, StandardCharsets.UTF_8));
         var mainSchema = schema.mainSchema();

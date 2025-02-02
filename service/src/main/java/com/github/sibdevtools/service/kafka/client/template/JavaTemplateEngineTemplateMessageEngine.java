@@ -9,6 +9,7 @@ import gg.jte.TemplateEngine;
 import gg.jte.output.StringOutput;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
@@ -20,7 +21,7 @@ import java.util.Map;
 @Component
 public class JavaTemplateEngineTemplateMessageEngine implements TemplateMessageEngine {
     @Override
-    public byte[] render(byte[] template, Map<String, Object> input) {
+    public byte[] render(byte[] template, Map<String, Serializable> input) {
         var codeResolver = new CodeResolver() {
             @Override
             public String resolve(String name) {

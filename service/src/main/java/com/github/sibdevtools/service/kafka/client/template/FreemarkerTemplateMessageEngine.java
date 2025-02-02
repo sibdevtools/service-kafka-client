@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ import java.util.Map;
 @Component
 public class FreemarkerTemplateMessageEngine implements TemplateMessageEngine {
     @Override
-    public byte[] render(byte[] template, Map<String, Object> input) {
+    public byte[] render(byte[] template, Map<String, Serializable> input) {
         var configuration = new Configuration(Configuration.VERSION_2_3_30);
         var stringTemplate = new String(template, StandardCharsets.UTF_8);
         try {
