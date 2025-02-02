@@ -6,5 +6,6 @@ package com.github.sibdevtools.service.kafka.client.entity;
  */
 public enum MessageEngine {
     FREEMARKER,
-    JAVA_TEMPLATE_ENGINE
+    JAVA_TEMPLATE_ENGINE,
+    AVRO
 }

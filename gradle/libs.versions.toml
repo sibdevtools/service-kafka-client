@@ -11,6 +11,7 @@ kafka-clients = "3.9.0"
 json-schema-validator = "1.5.5"
 jte = "3.1.16"
 freemarker = "2.3.34"
+avro = "1.12.0"
 
 # service APIs deps
 common-api = "0.0.2"
@@ -41,6 +42,7 @@ mapstruct-lombok-binding = { module = "org.projectlombok:lombok-mapstruct-bindin
 json-schema-validator = {module = "com.networknt:json-schema-validator", version.ref = "json-schema-validator"}
 jte = {module = "gg.jte:jte", version.ref = "jte"}
 freemarker = {module = "org.freemarker:freemarker", version.ref = "freemarker"}
+avro = {module = "org.apache.avro:avro", version.ref = "avro"}
 
 kafka-clients = { module = "org.apache.kafka:kafka-clients", version.ref = "kafka-clients" }
 
