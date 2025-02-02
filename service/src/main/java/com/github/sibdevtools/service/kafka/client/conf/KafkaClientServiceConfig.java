@@ -22,16 +22,6 @@ import java.util.Map;
  * @author sibmaks
  * @since 0.0.1
  */
-@ErrorLocalizationsJsonSource(
-        systemCode = "KAFKA_CLIENT_SERVICE",
-        iso3Code = "eng",
-        path = "classpath:/service/kafka/client/errors/eng.json"
-)
-@ErrorLocalizationsJsonSource(
-        systemCode = "KAFKA_CLIENT_SERVICE",
-        iso3Code = "rus",
-        path = "classpath:/service/kafka/client/errors/rus.json"
-)
 @Configuration
 @PropertySource("classpath:/service/kafka/client/application.properties")
 public class KafkaClientServiceConfig {
