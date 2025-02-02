@@ -20,6 +20,7 @@ public class MessageTemplateDto {
     private String code;
     private String name;
     private MessageEngine engine;
+    private Map<String, String> headers;
     private Map<String, Object> schema;
     private byte[] template;
 
