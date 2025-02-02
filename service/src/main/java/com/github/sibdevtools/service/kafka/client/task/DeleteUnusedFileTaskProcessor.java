@@ -30,7 +30,7 @@ import java.util.Optional;
         taskVersions = "v1"
 )
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class CleanUpRemovedMockFileProcessor implements AsyncTaskProcessor {
+public class DeleteUnusedFileTaskProcessor implements AsyncTaskProcessor {
     private final StorageService storageService;
     private final MessageTemplateRepository messageTemplateRepository;
 
