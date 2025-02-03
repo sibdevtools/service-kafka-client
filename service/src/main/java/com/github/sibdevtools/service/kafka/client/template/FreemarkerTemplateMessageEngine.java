@@ -20,7 +20,14 @@ import java.util.Map;
 @Component
 public class FreemarkerTemplateMessageEngine implements TemplateMessageEngine {
     @Override
-    public byte[] render(byte[] template, Map<String, Serializable> input) {
+    public RenderedMessage render(
+            Integer partition,
+            Long timestamp,
+            byte[] key,
+            byte[] template,
+            Map<String, Serializable> input,
+            Map<String, byte[]> headers
+    ) {
         var configuration = new Configuration(Configuration.VERSION_2_3_30);
         var stringTemplate = new String(template, StandardCharsets.UTF_8);
         try {
@@ -29,7 +36,14 @@ public class FreemarkerTemplateMessageEngine implements TemplateMessageEngine {
             var writer = new OutputStreamWriter(byteOutputStream);
             runtimeTemplate.process(input, writer);
             writer.flush();
-            return byteOutputStream.toByteArray();
+            var value = byteOutputStream.toByteArray();
+            return SimpleRenderedMessage.builder()
+                    .partition(partition)
+                    .timestamp(timestamp)
+                    .key(key)
+                    .value(value)
+                    .headers(headers)
+                    .build();
         } catch (Exception e) {
             throw new ServiceException(Constant.ERROR_SOURCE, "TEMPLATE_ERROR", "Can't render template", e);
         }

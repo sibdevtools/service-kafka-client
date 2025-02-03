@@ -24,8 +24,23 @@ public class TemplateMessageEngineFacade {
         engines.forEach(engine -> messageEngines.put(engine.getEngine(), engine));
     }
 
-    public byte[] render(MessageEngine engine, byte[] template, Map<String, Serializable> input) {
+    public RenderedMessage render(
+            MessageEngine engine,
+            Integer partition,
+            Long timestamp,
+            byte[] key,
+            byte[] template,
+            Map<String, Serializable> input,
+            Map<String, byte[]> headers
+    ) {
         var templateMessageEngine = messageEngines.get(engine);
-        return templateMessageEngine.render(template, input);
+        return templateMessageEngine.render(
+                partition,
+                timestamp,
+                key,
+                template,
+                input,
+                headers
+        );
     }
 }

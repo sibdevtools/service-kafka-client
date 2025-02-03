@@ -11,7 +11,14 @@ import java.util.Map;
  */
 public interface TemplateMessageEngine {
 
-    byte[] render(byte[] template, Map<String, Serializable> input);
+    RenderedMessage render(
+            Integer partition,
+            Long timestamp,
+            byte[] key,
+            byte[] template,
+            Map<String, Serializable> input,
+            Map<String, byte[]> headers
+    );
 
     MessageEngine getEngine();
 
