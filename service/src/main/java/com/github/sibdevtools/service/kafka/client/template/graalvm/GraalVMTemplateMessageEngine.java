@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @Slf4j
 @AllArgsConstructor
-public abstract class GraalVMRequestHandler implements TemplateMessageEngine {
+public abstract class GraalVMTemplateMessageEngine implements TemplateMessageEngine {
     protected final String language;
     protected final SessionService sessionService;
     protected final ObjectMapper objectMapper;

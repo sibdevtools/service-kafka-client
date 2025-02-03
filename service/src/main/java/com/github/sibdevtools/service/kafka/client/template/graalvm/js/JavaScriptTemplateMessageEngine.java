@@ -2,7 +2,7 @@ package com.github.sibdevtools.service.kafka.client.template.graalvm.js;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sibdevtools.service.kafka.client.entity.MessageEngine;
-import com.github.sibdevtools.service.kafka.client.template.graalvm.GraalVMRequestHandler;
+import com.github.sibdevtools.service.kafka.client.template.graalvm.GraalVMTemplateMessageEngine;
 import com.github.sibdevtools.session.api.service.SessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +15,11 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class JavaScriptRequestHandler extends GraalVMRequestHandler {
+public class JavaScriptTemplateMessageEngine extends GraalVMTemplateMessageEngine {
 
     @Autowired
-    public JavaScriptRequestHandler(SessionService sessionService,
-                                    @Qualifier("kafkaClientServiceObjectMapper")
+    public JavaScriptTemplateMessageEngine(SessionService sessionService,
+                                           @Qualifier("kafkaClientServiceObjectMapper")
                                     ObjectMapper objectMapper) {
         super("js", sessionService, objectMapper);
     }
