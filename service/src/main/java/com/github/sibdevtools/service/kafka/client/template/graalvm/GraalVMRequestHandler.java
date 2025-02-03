@@ -41,7 +41,6 @@ public abstract class GraalVMRequestHandler implements TemplateMessageEngine {
             Map<String, byte[]> headers
     ) {
         var request = new GraalVMRequest(
-                decoder,
                 encoder,
                 partition,
                 timestamp,
@@ -52,7 +51,6 @@ public abstract class GraalVMRequestHandler implements TemplateMessageEngine {
         var response = new GraalVMResponse(
                 objectMapper,
                 decoder,
-                encoder,
                 partition,
                 timestamp,
                 key,

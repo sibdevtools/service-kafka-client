@@ -13,8 +13,6 @@ import java.util.Map;
  * @since 0.0.7
  */
 public class GraalVMRequest {
-    private final Base64.Decoder decoder;
-    private final Base64.Encoder encoder;
     @HostAccess.Export
     public final Integer partition;
     @HostAccess.Export
@@ -25,6 +23,7 @@ public class GraalVMRequest {
     public final Map<String, Serializable> input;
     @HostAccess.Export
     public final Map<String, byte[]> headers;
+    private final Base64.Encoder encoder;
 
     /**
      * Construct graalvm http request
@@ -36,7 +35,6 @@ public class GraalVMRequest {
      * @param headers   request headers
      */
     public GraalVMRequest(
-            Base64.Decoder decoder,
             Base64.Encoder encoder,
             Integer partition,
             Long timestamp,
@@ -44,7 +42,6 @@ public class GraalVMRequest {
             Map<String, Serializable> input,
             Map<String, byte[]> headers
     ) {
-        this.decoder = decoder;
         this.encoder = encoder;
         this.partition = partition;
         this.timestamp = timestamp;
@@ -70,8 +67,8 @@ public class GraalVMRequest {
      * @return raw key as a decoded string or null if not found
      */
     @HostAccess.Export
-    public Serializable rawKey() {
-        return key == null ? null : decoder.decode(key);
+    public String rawKey() {
+        return key == null ? null : new String(key, StandardCharsets.UTF_8);
     }
 
     /**
@@ -86,7 +83,7 @@ public class GraalVMRequest {
         if (value == null) {
             return null;
         }
-        return new String(decoder.decode(value), StandardCharsets.UTF_8);
+        return new String(value, StandardCharsets.UTF_8);
     }
 
     /**

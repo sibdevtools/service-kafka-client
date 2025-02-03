@@ -25,7 +25,6 @@ import java.util.Map;
 public class GraalVMResponse {
     private final ObjectMapper objectMapper;
     private final Base64.Decoder decoder;
-    private final Base64.Encoder encoder;
     private Integer partition;
     private Long timestamp;
     private byte[] key;
@@ -35,7 +34,6 @@ public class GraalVMResponse {
     public GraalVMResponse(
             ObjectMapper objectMapper,
             Base64.Decoder decoder,
-            Base64.Encoder encoder,
             Integer partition,
             Long timestamp,
             byte[] key,
@@ -43,7 +41,6 @@ public class GraalVMResponse {
     ) {
         this.objectMapper = objectMapper;
         this.decoder = decoder;
-        this.encoder = encoder;
         this.partition = partition;
         this.timestamp = timestamp;
         this.key = key;
@@ -65,8 +62,8 @@ public class GraalVMResponse {
         if (headers == null) {
             headers = new LinkedHashMap<>();
         }
-        byte[] rawValue = value.getBytes(StandardCharsets.UTF_8);
-        headers.put(key, encoder.encode(rawValue));
+        var rawValue = value.getBytes(StandardCharsets.UTF_8);
+        headers.put(key, rawValue);
     }
 
     @HostAccess.Export
