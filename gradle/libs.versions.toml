@@ -9,7 +9,6 @@ mapstruct = "1.6.2"
 mapstruct-lombok-binding = "0.2.0"
 kafka-clients = "3.9.0"
 json-schema-validator = "1.5.5"
-jte = "3.1.16"
 freemarker = "2.3.34"
 avro = "1.12.0"
 
@@ -40,7 +39,6 @@ mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.re
 mapstruct-lombok-binding = { module = "org.projectlombok:lombok-mapstruct-binding", version.ref = "mapstruct-lombok-binding" }
 
 json-schema-validator = {module = "com.networknt:json-schema-validator", version.ref = "json-schema-validator"}
-jte = {module = "gg.jte:jte", version.ref = "jte"}
 freemarker = {module = "org.freemarker:freemarker", version.ref = "freemarker"}
 avro = {module = "org.apache.avro:avro", version.ref = "avro"}
 

@@ -39,7 +39,6 @@ dependencies {
     implementation(libs.mapstruct)
     implementation(libs.mapstruct.lombok.binding)
     implementation(libs.json.schema.validator)
-    implementation(libs.jte)
     implementation(libs.freemarker)
     implementation(libs.avro)
     implementation(libs.kafka.clients)
