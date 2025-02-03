@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.kafka.clients)
 
     implementation(libs.bundles.service.api)
+    implementation(libs.bundles.graalvm)
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-web")

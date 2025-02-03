@@ -223,8 +223,6 @@ public class TemplateMessageService {
 
         var template = readTemplate(entity);
 
-        var payload = templateMessageEngineFacade.render(entity.getEngine(), template, input);
-
         var headers = new LinkedHashMap<String, byte[]>();
         var entityHeaders = entity.getHeaders();
         if (entityHeaders != null) {
@@ -239,14 +237,24 @@ public class TemplateMessageService {
             headers.putAll(rqHeaders);
         }
 
-        return messagePublisherService.sendMessage(
-                rq.getBootstrapGroupId(),
-                rq.getTopic(),
+        var renderedMessage = templateMessageEngineFacade.render(
+                entity.getEngine(),
                 rq.getPartition(),
                 rq.getTimestamp(),
                 rq.getKey(),
-                payload,
-                headers,
+                template,
+                input,
+                headers
+        );
+
+        return messagePublisherService.sendMessage(
+                rq.getBootstrapGroupId(),
+                rq.getTopic(),
+                renderedMessage.getPartition(),
+                renderedMessage.getTimestamp(),
+                renderedMessage.getKey(),
+                renderedMessage.getValue(),
+                renderedMessage.getHeaders(),
                 rq.getMaxTimeout()
         );
     }

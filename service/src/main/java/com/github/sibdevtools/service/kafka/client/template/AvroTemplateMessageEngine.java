@@ -22,7 +22,14 @@ import java.util.Map;
 @Component
 public class AvroTemplateMessageEngine implements TemplateMessageEngine {
     @Override
-    public byte[] render(byte[] template, Map<String, Serializable> input) {
+    public RenderedMessage render(
+            Integer partition,
+            Long timestamp,
+            byte[] key,
+            byte[] template,
+            Map<String, Serializable> input,
+            Map<String, byte[]> headers
+    ) {
         var schemaParser = new SchemaParser();
         var schema = schemaParser.parse(new String(template, StandardCharsets.UTF_8));
         var mainSchema = schema.mainSchema();
@@ -45,7 +52,14 @@ public class AvroTemplateMessageEngine implements TemplateMessageEngine {
             dataFileWriter.append(message);
             dataFileWriter.flush();
             dataFileWriter.close();
-            return outputStream.toByteArray();
+            var value = outputStream.toByteArray();
+            return SimpleRenderedMessage.builder()
+                    .partition(partition)
+                    .timestamp(timestamp)
+                    .key(key)
+                    .value(value)
+                    .headers(headers)
+                    .build();
         } catch (IOException e) {
             throw new ServiceException(Constant.ERROR_SOURCE, "TEMPLATE_ERROR", "Can't render template", e);
         }
