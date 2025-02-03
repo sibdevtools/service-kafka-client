@@ -1,9 +1,11 @@
 package com.github.sibdevtools.service.kafka.client.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,78 @@ public class MessageConsumerService {
 
     public MessageConsumerService(BootstrapGroupService bootstrapGroupService) {
         this.bootstrapGroupService = bootstrapGroupService;
+    }
+
+    private static Properties getProperties(String bootstrapServers) {
+        var properties = new Properties();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-client-service" + UUID.randomUUID());
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        return properties;
+    }
+
+    private static void changeOffsets(int maxMessages, KafkaConsumer<byte[], byte[]> consumer) {
+        var partitions = consumer.assignment();
+        var beginningOffsets = consumer.beginningOffsets(partitions);
+        var endOffsets = consumer.endOffsets(partitions);
+        var offsetsPool = new HashMap<TopicPartition, Pair<Long, Long>>();
+        for (var partition : partitions) {
+            var beginOffset = beginningOffsets.get(partition);
+            var endOffset = endOffsets.get(partition);
+            if (beginOffset == null || endOffset == null || beginOffset.equals(endOffset)) {
+                continue;
+            }
+            offsetsPool.put(partition, Pair.of(beginOffset, endOffset));
+        }
+
+        var totalAvailableMessages = offsetsPool.values().stream()
+                .mapToLong(pair -> pair.getRight() - pair.getLeft())
+                .sum();
+
+        if (totalAvailableMessages <= maxMessages) {
+            for (var entry : offsetsPool.entrySet()) {
+                var offsets = entry.getValue();
+                consumer.seek(entry.getKey(), offsets.getLeft());
+            }
+        } else {
+            var offsets = getPartitionOffsets(maxMessages, offsetsPool);
+
+            for (var entry : offsets.entrySet()) {
+                consumer.seek(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    private static HashMap<TopicPartition, Long> getPartitionOffsets(
+            int maxMessages,
+            Map<TopicPartition, Pair<Long, Long>> offsetsPool
+    ) {
+        var offsets = new HashMap<TopicPartition, Long>();
+        long remainingMessages = maxMessages;
+
+        var found = true;
+        while (remainingMessages > 0 && found) {
+            found = false;
+            for (var entry : offsetsPool.entrySet()) {
+                var partition = entry.getKey();
+                var partitionOffsets = entry.getValue();
+                var beginOffset = partitionOffsets.getLeft();
+                var endOffset = partitionOffsets.getRight();
+                var offset = offsets.getOrDefault(partition, endOffset);
+
+                if (offset > beginOffset) {
+                    offsets.put(partition, offset - 1);
+                    remainingMessages -= 1;
+                    found = true;
+                    if (remainingMessages <= 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        return offsets;
     }
 
     public Optional<List<ConsumerRecord<byte[], byte[]>>> getMessages(
@@ -83,15 +157,7 @@ public class MessageConsumerService {
             maxTimeout -= currentTime - timer;
             timer = currentTime;
 
-            var partitions = consumer.assignment();
-            consumer.seekToEnd(partitions);
-            var endOffset = partitions.stream()
-                    .mapToLong(consumer::position)
-                    .sum();
-
-            var startOffset = Math.max(0, endOffset - maxMessages);
-
-            partitions.forEach(partition -> consumer.seek(partition, startOffset));
+            changeOffsets(maxMessages, consumer);
 
             while (messages.size() < maxMessages && maxTimeout > 0) {
                 var records = consumer.poll(Duration.ofMillis(maxTimeout));
@@ -111,16 +177,6 @@ public class MessageConsumerService {
             return Optional.empty();
         }
         return Optional.of(messages);
-    }
-
-    private static Properties getProperties(String bootstrapServers) {
-        var properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-client-service" + UUID.randomUUID());
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        return properties;
     }
 
 }
