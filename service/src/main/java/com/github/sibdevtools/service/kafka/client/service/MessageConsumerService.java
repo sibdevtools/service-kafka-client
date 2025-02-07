@@ -25,13 +25,17 @@ public class MessageConsumerService {
         this.bootstrapGroupService = bootstrapGroupService;
     }
 
-    private static Properties getProperties(String bootstrapServers) {
+    private static Properties getProperties(String bootstrapServers, long maxTimeout) {
         var properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, "kafka-client-service" + UUID.randomUUID());
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(ConsumerConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, maxTimeout);
+        properties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, maxTimeout);
+        properties.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG, maxTimeout);
+        properties.put(ConsumerConfig.SOCKET_CONNECTION_SETUP_TIMEOUT_MAX_MS_CONFIG, maxTimeout);
         return properties;
     }
 
@@ -108,7 +112,7 @@ public class MessageConsumerService {
         maxTimeout = maxTimeout == null ? entity.getMaxTimeout() : maxTimeout;
         var bootstrapServers = String.join(",", entity.getBootstrapServers());
 
-        var properties = getProperties(bootstrapServers);
+        var properties = getProperties(bootstrapServers, maxTimeout);
 
         var messages = new ArrayList<ConsumerRecord<byte[], byte[]>>();
         try (var consumer = new KafkaConsumer<byte[], byte[]>(properties)) {
@@ -146,7 +150,7 @@ public class MessageConsumerService {
         maxTimeout = maxTimeout == null ? entity.getMaxTimeout() : maxTimeout;
         var bootstrapServers = String.join(",", entity.getBootstrapServers());
 
-        var properties = getProperties(bootstrapServers);
+        var properties = getProperties(bootstrapServers, maxTimeout);
 
         var messages = new ArrayList<ConsumerRecord<byte[], byte[]>>();
         try (var consumer = new KafkaConsumer<byte[], byte[]>(properties)) {
