@@ -81,14 +81,18 @@ public class BootstrapGroupService {
     public boolean ping(long id) {
         var entity = get(id);
         var bootstrapServers = String.join(",", entity.getBootstrapServers());
+        var maxTimeout = entity.getMaxTimeout();
 
         var props = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, maxTimeout);
+        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, maxTimeout);
+        props.put(AdminClientConfig.SOCKET_CONNECTION_SETUP_TIMEOUT_MAX_MS_CONFIG, maxTimeout);
 
         try (var adminClient = AdminClient.create(props)) {
             var topics = adminClient.listTopics();
             var topicsFuture = topics.names();
-            topicsFuture.get(entity.getMaxTimeout(), TimeUnit.MILLISECONDS);
+            topicsFuture.get(maxTimeout, TimeUnit.MILLISECONDS);
             return true;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -103,14 +107,18 @@ public class BootstrapGroupService {
     public Optional<SortedSet<String>> getTopicNames(long id) {
         var entity = get(id);
         var bootstrapServers = String.join(",", entity.getBootstrapServers());
+        var maxTimeout = entity.getMaxTimeout();
 
         var props = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, maxTimeout);
+        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, maxTimeout);
+        props.put(AdminClientConfig.SOCKET_CONNECTION_SETUP_TIMEOUT_MAX_MS_CONFIG, maxTimeout);
 
         try (var adminClient = AdminClient.create(props)) {
             var topics = adminClient.listTopics();
             var topicsFuture = topics.names();
-            var names = topicsFuture.get(entity.getMaxTimeout(), TimeUnit.MILLISECONDS);
+            var names = topicsFuture.get(maxTimeout, TimeUnit.MILLISECONDS);
             return Optional.of(new TreeSet<>(names));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -125,15 +133,19 @@ public class BootstrapGroupService {
     public Optional<TopicDescriptionDto> getTopicDescription(long id, String topic) {
         var entity = get(id);
         var bootstrapServers = String.join(",", entity.getBootstrapServers());
+        var maxTimeout = entity.getMaxTimeout();
 
         var props = new Properties();
         props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(AdminClientConfig.DEFAULT_API_TIMEOUT_MS_CONFIG, maxTimeout);
+        props.put(AdminClientConfig.REQUEST_TIMEOUT_MS_CONFIG, maxTimeout);
+        props.put(AdminClientConfig.SOCKET_CONNECTION_SETUP_TIMEOUT_MAX_MS_CONFIG, maxTimeout);
 
         try (var adminClient = AdminClient.create(props)) {
             var described = adminClient.describeTopics(Set.of(topic));
             var topicNameValues = described.topicNameValues();
             var topicDescriptionKafkaFuture = topicNameValues.get(topic);
-            var topicDescription = topicDescriptionKafkaFuture.get(entity.getMaxTimeout(), TimeUnit.MILLISECONDS);
+            var topicDescription = topicDescriptionKafkaFuture.get(maxTimeout, TimeUnit.MILLISECONDS);
             return Optional.of(topicDescription)
                     .map(TopicDescriptionDto::new);
         } catch (InterruptedException e) {

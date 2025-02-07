@@ -61,6 +61,10 @@ public class MessagePublisherService {
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, "kafka-client-service" + UUID.randomUUID());
+        properties.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, maxTimeout);
+        properties.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, maxTimeout);
+        properties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, maxTimeout);
+        properties.put(ProducerConfig.SOCKET_CONNECTION_SETUP_TIMEOUT_MAX_MS_CONFIG, maxTimeout);
 
         var headers = new RecordHeaders();
         if (headersMap != null) {
