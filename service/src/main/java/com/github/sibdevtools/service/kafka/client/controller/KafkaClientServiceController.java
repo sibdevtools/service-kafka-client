@@ -106,7 +106,7 @@ public class KafkaClientServiceController {
             @PathVariable("id") String rawId,
             @PathVariable("topic") String topic,
             @RequestParam(value = "maxMessages", required = false, defaultValue = "10") Integer rawMaxMessages,
-            @RequestParam(value = "maxTimeout", required = false) Long maxTimeout
+            @RequestParam(value = "maxTimeout", required = false) Integer maxTimeout
     ) {
         var id = Long.parseLong(rawId);
         var maxMessages = rawMaxMessages == null ? 10 : Math.min(rawMaxMessages, 1000);
@@ -123,7 +123,7 @@ public class KafkaClientServiceController {
             @PathVariable("id") String rawId,
             @PathVariable("topic") String topic,
             @RequestParam(value = "maxMessages", required = false, defaultValue = "10") Integer rawMaxMessages,
-            @RequestParam(value = "maxTimeout", required = false) Long maxTimeout
+            @RequestParam(value = "maxTimeout", required = false) Integer maxTimeout
     ) {
         var id = Long.parseLong(rawId);
         var maxMessages = rawMaxMessages == null ? 10 : Math.min(rawMaxMessages, 1000);

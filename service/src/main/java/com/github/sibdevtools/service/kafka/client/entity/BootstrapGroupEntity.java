@@ -28,7 +28,7 @@ public class BootstrapGroupEntity {
     @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "max_timeout", nullable = false)
-    private long maxTimeout;
+    private int maxTimeout;
     @ElementCollection
     @CollectionTable(
             schema = "kafka_client_service",

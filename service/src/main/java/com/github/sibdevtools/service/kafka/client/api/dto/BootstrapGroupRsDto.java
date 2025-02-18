@@ -24,7 +24,7 @@ public class BootstrapGroupRsDto implements Serializable {
     private long id;
     private String code;
     private String name;
-    private Long maxTimeout;
+    private Integer maxTimeout;
     private List<String> bootstrapServers;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSS")
     private ZonedDateTime createdAt;

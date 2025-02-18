@@ -49,7 +49,7 @@ public class MessagePublisherService {
             byte[] key,
             byte[] value,
             Map<String, byte[]> headersMap,
-            Long maxTimeout
+            Integer maxTimeout
     ) {
         var entity = bootstrapGroupService.get(id);
         maxTimeout = maxTimeout == null ? entity.getMaxTimeout() : maxTimeout;
