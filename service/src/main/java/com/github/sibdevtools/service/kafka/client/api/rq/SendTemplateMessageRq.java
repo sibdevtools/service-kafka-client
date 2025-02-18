@@ -23,5 +23,5 @@ public class SendTemplateMessageRq implements Serializable {
     private byte[] key;
     private Map<String, Serializable> input;
     private Map<String, byte[]> headers;
-    private Long maxTimeout;
+    private Integer maxTimeout;
 }

@@ -25,7 +25,7 @@ public class MessageConsumerService {
         this.bootstrapGroupService = bootstrapGroupService;
     }
 
-    private static Properties getProperties(String bootstrapServers, long maxTimeout) {
+    private static Properties getProperties(String bootstrapServers, int maxTimeout) {
         var properties = new Properties();
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
@@ -105,7 +105,7 @@ public class MessageConsumerService {
             long id,
             String topic,
             int maxMessages,
-            Long maxTimeout
+            Integer maxTimeout
     ) {
         var timer = System.currentTimeMillis();
         var entity = bootstrapGroupService.get(id);
@@ -121,7 +121,7 @@ public class MessageConsumerService {
             while (messages.size() < maxMessages && maxTimeout > 0) {
                 var records = consumer.poll(Duration.ofMillis(maxTimeout));
                 var currentTime = System.currentTimeMillis();
-                maxTimeout -= currentTime - timer;
+                maxTimeout -= Math.toIntExact(currentTime - timer);
                 timer = currentTime;
 
                 for (var message : records) {
@@ -143,7 +143,7 @@ public class MessageConsumerService {
             long id,
             String topic,
             int maxMessages,
-            Long maxTimeout
+            Integer maxTimeout
     ) {
         var timer = System.currentTimeMillis();
         var entity = bootstrapGroupService.get(id);
@@ -158,7 +158,7 @@ public class MessageConsumerService {
 
             consumer.poll(Duration.ofMillis(maxTimeout));
             var currentTime = System.currentTimeMillis();
-            maxTimeout -= currentTime - timer;
+            maxTimeout -= Math.toIntExact(currentTime - timer);
             timer = currentTime;
 
             changeOffsets(maxMessages, consumer);
@@ -166,7 +166,7 @@ public class MessageConsumerService {
             while (messages.size() < maxMessages && maxTimeout > 0) {
                 var records = consumer.poll(Duration.ofMillis(maxTimeout));
                 currentTime = System.currentTimeMillis();
-                maxTimeout -= currentTime - timer;
+                maxTimeout -= Math.toIntExact(currentTime - timer);
                 timer = currentTime;
                 for (var message : records) {
                     messages.add(message);

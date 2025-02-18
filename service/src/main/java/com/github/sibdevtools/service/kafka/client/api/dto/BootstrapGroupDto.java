@@ -18,6 +18,6 @@ import java.util.List;
 public class BootstrapGroupDto {
     private String code;
     private String name;
-    private Long maxTimeout;
+    private Integer maxTimeout;
     private List<String> bootstrapServers;
 }

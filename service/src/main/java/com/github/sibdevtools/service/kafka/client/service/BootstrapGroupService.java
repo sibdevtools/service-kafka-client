@@ -122,10 +122,10 @@ public class BootstrapGroupService {
             return Optional.of(new TreeSet<>(names));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.error("Can't ping bootstrap group", e);
+            log.error("Can't get topic names", e);
             return Optional.empty();
         } catch (Exception e) {
-            log.error("Can't ping bootstrap group", e);
+            log.error("Can't get topic names", e);
             return Optional.empty();
         }
     }
@@ -150,10 +150,10 @@ public class BootstrapGroupService {
                     .map(TopicDescriptionDto::new);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            log.error("Can't ping bootstrap group", e);
+            log.error("Can't get topic description", e);
             return Optional.empty();
         } catch (Exception e) {
-            log.error("Can't ping bootstrap group", e);
+            log.error("Can't get topic description", e);
             return Optional.empty();
         }
     }

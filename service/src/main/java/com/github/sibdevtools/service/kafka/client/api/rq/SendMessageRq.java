@@ -21,5 +21,5 @@ public class SendMessageRq implements Serializable {
     private byte[] key;
     private byte[] value;
     private Map<String, byte[]> headers;
-    private Long maxTimeout;
+    private Integer maxTimeout;
 }
