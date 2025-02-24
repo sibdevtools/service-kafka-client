@@ -65,7 +65,7 @@ public abstract class GraalVMTemplateMessageEngine implements TemplateMessageEng
         try (var js = Context.newBuilder(language)
                 .allowHostAccess(HostAccess.ALL)
                 .build()) {
-            js.getBindings(language).putMember("wam", context);
+            js.getBindings(language).putMember("wak", context);
             var script = new String(template, StandardCharsets.UTF_8);
             try {
                 js.eval(language, script);
