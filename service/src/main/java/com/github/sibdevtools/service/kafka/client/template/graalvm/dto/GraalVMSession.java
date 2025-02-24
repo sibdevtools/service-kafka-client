@@ -1,7 +1,9 @@
 package com.github.sibdevtools.service.kafka.client.template.graalvm.dto;
 
+import com.github.sibdevtools.service.kafka.client.template.graalvm.GraalVMConverter;
 import com.github.sibdevtools.session.api.ModificationQueryBuilder;
 import com.github.sibdevtools.session.api.dto.SessionId;
+import com.github.sibdevtools.session.api.rq.GetSessionAttributeNamesRq;
 import com.github.sibdevtools.session.api.rq.GetSessionAttributeRq;
 import com.github.sibdevtools.session.api.rq.UpdateSessionRq;
 import com.github.sibdevtools.session.api.service.SessionService;
@@ -9,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.graalvm.polyglot.HostAccess;
 
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * @author sibmaks
@@ -32,13 +35,26 @@ public class GraalVMSession {
                 .attribute(attribute)
                 .build();
 
-        return sessionService.getAttribute(rq);
+        return sessionService.getAttribute(rq)
+                .getBody();
     }
 
     @HostAccess.Export
-    public void add(String section, String attribute, Serializable data) {
+    public Set<String> getAttributeNames(String section) {
+        var rq = GetSessionAttributeNamesRq.builder()
+                .sessionId(sessionId)
+                .section(section)
+                .build();
+
+        return sessionService.getAttributeNames(rq)
+                .getBody();
+    }
+
+    @HostAccess.Export
+    public void add(String section, String attribute, Object data) {
+        var serialized = GraalVMConverter.toSerializable(data);
         var modificationQuery = ModificationQueryBuilder.builder()
-                .create(section, attribute, data)
+                .create(section, attribute, serialized)
                 .build();
         var rq = UpdateSessionRq.builder()
                 .sessionId(sessionId)
@@ -49,9 +65,10 @@ public class GraalVMSession {
     }
 
     @HostAccess.Export
-    public void set(String section, String attribute, Serializable data) {
+    public void set(String section, String attribute, Object data) {
+        var serialized = GraalVMConverter.toSerializable(data);
         var modificationQuery = ModificationQueryBuilder.builder()
-                .createOrChange(section, attribute, data)
+                .createOrChange(section, attribute, serialized)
                 .build();
         var rq = UpdateSessionRq.builder()
                 .sessionId(sessionId)

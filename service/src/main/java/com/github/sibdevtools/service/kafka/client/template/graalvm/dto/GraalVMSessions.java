@@ -1,5 +1,6 @@
 package com.github.sibdevtools.service.kafka.client.template.graalvm.dto;
 
+import com.github.sibdevtools.service.kafka.client.template.graalvm.GraalVMConverter;
 import com.github.sibdevtools.session.api.dto.SessionId;
 import com.github.sibdevtools.session.api.dto.SessionOwnerType;
 import com.github.sibdevtools.session.api.rq.CreateSessionRq;
@@ -8,7 +9,6 @@ import jakarta.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import org.graalvm.polyglot.HostAccess;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -43,13 +43,13 @@ public class GraalVMSessions {
     }
 
     @HostAccess.Export
-    public GraalVMSession create(@Nonnull Map<String, Map<String, Serializable>> sections,
+    public GraalVMSession create(@Nonnull Map<String, Map<String, ?>> sections,
                                  @Nonnull String ownerTypeCode,
                                  @Nonnull String ownerId,
                                  @Nonnull List<String> permissions) {
         var ownerType = SessionOwnerType.valueOf(ownerTypeCode);
         var rq = CreateSessionRq.builder()
-                .sections(sections)
+                .sections(GraalVMConverter.convertSections(sections))
                 .ownerType(ownerType)
                 .ownerId(ownerId)
                 .permissions(permissions)
