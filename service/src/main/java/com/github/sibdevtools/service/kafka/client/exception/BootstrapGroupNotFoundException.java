@@ -13,6 +13,6 @@ public class BootstrapGroupNotFoundException extends ServiceException {
     }
 
     public BootstrapGroupNotFoundException(String groupCode) {
-        super(Constant.ERROR_SOURCE, "GROUP_NOT_FOUND", "Bootstrap group with code '%d' not found".formatted(groupCode));
+        super(Constant.ERROR_SOURCE, "GROUP_NOT_FOUND", "Bootstrap group with code '%s' not found".formatted(groupCode));
     }
 }

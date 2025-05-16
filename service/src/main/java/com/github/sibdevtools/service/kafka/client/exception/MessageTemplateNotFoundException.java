@@ -13,6 +13,6 @@ public class MessageTemplateNotFoundException extends ServiceException {
     }
 
     public MessageTemplateNotFoundException(String groupCode) {
-        super(Constant.ERROR_SOURCE, "MESSAGE_TEMPLATE", "Message template with code '%d' not found".formatted(groupCode));
+        super(Constant.ERROR_SOURCE, "MESSAGE_TEMPLATE", "Message template with code '%s' not found".formatted(groupCode));
     }
 }
