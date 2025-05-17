@@ -9,10 +9,7 @@ import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,10 +51,45 @@ public class MessagePublisherService {
         var entity = bootstrapGroupService.get(id);
         maxTimeout = maxTimeout == null ? entity.getMaxTimeout() : maxTimeout;
 
-        var bootstrapServers = String.join(",", entity.getBootstrapServers());
+        return sendMessage(
+                entity.getBootstrapServers(),
+                topic,
+                partition,
+                timestamp,
+                key,
+                value,
+                headersMap,
+                maxTimeout
+        );
+    }
+
+    /**
+     * Send a message to Kafka topic.
+     *
+     * @param bootstrapServers bootstrap servers line
+     * @param topic            topic to publish
+     * @param partition        partition to publish
+     * @param timestamp        message timestamp
+     * @param key              message key
+     * @param value            message value
+     * @param headersMap       message headers
+     * @param maxTimeout       max send timeout in milliseconds
+     * @return data about sent message metadata or empty optional if sending failed
+     */
+    public Optional<RecordMetadataDto> sendMessage(
+            List<String> bootstrapServers,
+            String topic,
+            Integer partition,
+            Long timestamp,
+            byte[] key,
+            byte[] value,
+            Map<String, byte[]> headersMap,
+            int maxTimeout
+    ) {
+        var bootstrapServersLine = String.join(",", bootstrapServers);
 
         var properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServersLine);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getName());
         properties.put(ProducerConfig.CLIENT_ID_CONFIG, "kafka-client-service" + UUID.randomUUID());
