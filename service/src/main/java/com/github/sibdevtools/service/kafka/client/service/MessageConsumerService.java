@@ -1,6 +1,7 @@
 package com.github.sibdevtools.service.kafka.client.service;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -75,18 +76,18 @@ public class MessageConsumerService {
             int maxMessages,
             Map<TopicPartition, Pair<Long, Long>> offsetsPool
     ) {
-        var offsets = new HashMap<TopicPartition, Long>();
-        long remainingMessages = maxMessages;
+        val offsets = new HashMap<TopicPartition, Long>();
+        var remainingMessages = maxMessages;
 
         var found = true;
         while (remainingMessages > 0 && found) {
             found = false;
-            for (var entry : offsetsPool.entrySet()) {
-                var partition = entry.getKey();
-                var partitionOffsets = entry.getValue();
-                var beginOffset = partitionOffsets.getLeft();
-                var endOffset = partitionOffsets.getRight();
-                var offset = offsets.getOrDefault(partition, endOffset);
+            for (val entry : offsetsPool.entrySet()) {
+                val partition = entry.getKey();
+                val partitionOffsets = entry.getValue();
+                val beginOffset = partitionOffsets.getLeft();
+                val endOffset = partitionOffsets.getRight();
+                val offset = offsets.getOrDefault(partition, endOffset);
 
                 if (offset > beginOffset) {
                     offsets.put(partition, offset - 1);
@@ -102,29 +103,27 @@ public class MessageConsumerService {
     }
 
     public Optional<List<ConsumerRecord<byte[], byte[]>>> getMessages(
-            long id,
+            List<String> bootstrapServers,
             String topic,
             int maxMessages,
-            Integer maxTimeout
+            int maxTimeout
     ) {
         var timer = System.currentTimeMillis();
-        var entity = bootstrapGroupService.get(id);
-        maxTimeout = maxTimeout == null ? entity.getMaxTimeout() : maxTimeout;
-        var bootstrapServers = String.join(",", entity.getBootstrapServers());
+        val bootstrapServersLine = String.join(",", bootstrapServers);
 
-        var properties = getProperties(bootstrapServers, maxTimeout);
+        val properties = getProperties(bootstrapServersLine, maxTimeout);
 
-        var messages = new ArrayList<ConsumerRecord<byte[], byte[]>>();
-        try (var consumer = new KafkaConsumer<byte[], byte[]>(properties)) {
+        val messages = new ArrayList<ConsumerRecord<byte[], byte[]>>();
+        try (val consumer = new KafkaConsumer<byte[], byte[]>(properties)) {
             consumer.subscribe(List.of(topic));
 
             while (messages.size() < maxMessages && maxTimeout > 0) {
-                var records = consumer.poll(Duration.ofMillis(maxTimeout));
-                var currentTime = System.currentTimeMillis();
+                val records = consumer.poll(Duration.ofMillis(maxTimeout));
+                val currentTime = System.currentTimeMillis();
                 maxTimeout -= Math.toIntExact(currentTime - timer);
                 timer = currentTime;
 
-                for (var message : records) {
+                for (val message : records) {
                     messages.add(message);
 
                     if (messages.size() >= maxMessages) {
@@ -139,21 +138,30 @@ public class MessageConsumerService {
         return Optional.of(messages);
     }
 
-    public Optional<List<ConsumerRecord<byte[], byte[]>>> getLastNMessages(
+    public Optional<List<ConsumerRecord<byte[], byte[]>>> getMessages(
             long id,
             String topic,
             int maxMessages,
             Integer maxTimeout
     ) {
-        var timer = System.currentTimeMillis();
-        var entity = bootstrapGroupService.get(id);
+        val entity = bootstrapGroupService.get(id);
         maxTimeout = maxTimeout == null ? entity.getMaxTimeout() : maxTimeout;
-        var bootstrapServers = String.join(",", entity.getBootstrapServers());
+        return getMessages(entity.getBootstrapServers(), topic, maxMessages, maxTimeout);
+    }
 
-        var properties = getProperties(bootstrapServers, maxTimeout);
+    public Optional<List<ConsumerRecord<byte[], byte[]>>> getLastNMessages(
+            List<String> bootstrapServers,
+            String topic,
+            int maxMessages,
+            int maxTimeout
+    ) {
+        var timer = System.currentTimeMillis();
+        val bootstrapServersLine = String.join(",", bootstrapServers);
 
-        var messages = new ArrayList<ConsumerRecord<byte[], byte[]>>();
-        try (var consumer = new KafkaConsumer<byte[], byte[]>(properties)) {
+        val properties = getProperties(bootstrapServersLine, maxTimeout);
+
+        val messages = new ArrayList<ConsumerRecord<byte[], byte[]>>();
+        try (val consumer = new KafkaConsumer<byte[], byte[]>(properties)) {
             consumer.subscribe(List.of(topic));
 
             consumer.poll(Duration.ofMillis(maxTimeout));
@@ -164,11 +172,11 @@ public class MessageConsumerService {
             changeOffsets(maxMessages, consumer);
 
             while (messages.size() < maxMessages && maxTimeout > 0) {
-                var records = consumer.poll(Duration.ofMillis(maxTimeout));
+                val records = consumer.poll(Duration.ofMillis(maxTimeout));
                 currentTime = System.currentTimeMillis();
                 maxTimeout -= Math.toIntExact(currentTime - timer);
                 timer = currentTime;
-                for (var message : records) {
+                for (val message : records) {
                     messages.add(message);
 
                     if (messages.size() >= maxMessages) {
@@ -181,6 +189,17 @@ public class MessageConsumerService {
             return Optional.empty();
         }
         return Optional.of(messages);
+    }
+
+    public Optional<List<ConsumerRecord<byte[], byte[]>>> getLastNMessages(
+            long id,
+            String topic,
+            int maxMessages,
+            Integer maxTimeout
+    ) {
+        val entity = bootstrapGroupService.get(id);
+        maxTimeout = maxTimeout == null ? entity.getMaxTimeout() : maxTimeout;
+        return getLastNMessages(entity.getBootstrapServers(), topic, maxMessages, maxTimeout);
     }
 
 }
