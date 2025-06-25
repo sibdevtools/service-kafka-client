@@ -2,16 +2,18 @@ package com.github.sibdevtools.service.kafka.client.template.graalvm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sibdevtools.service.kafka.client.template.RenderedMessage;
-import com.github.sibdevtools.service.kafka.client.template.TemplateMessageEngine;
 import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.GraalVMMessageTemplateContext;
 import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.GraalVMRequest;
 import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.GraalVMResponse;
-import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.GraalVMSessions;
-import com.github.sibdevtools.session.api.service.SessionService;
-import lombok.AllArgsConstructor;
+import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.ServiceKafkaClientGraalVMSessions;
+import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.kvs.ServiceKafkaClientGraalVMKeyValueStorage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.HostAccess;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -23,16 +25,21 @@ import java.util.Map;
  * @since 0.0.7
  */
 @Slf4j
-@AllArgsConstructor
-public abstract class GraalVMTemplateMessageEngine implements TemplateMessageEngine {
-    protected final String language;
-    protected final SessionService sessionService;
-    protected final ObjectMapper objectMapper;
+@Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class GraalVMTemplateMessageEngine {
+    private final ServiceKafkaClientGraalVMSessions sessions;
+    private final ServiceKafkaClientGraalVMKeyValueStorage keyValueStorage;
+
     private final Base64.Decoder decoder = Base64.getDecoder();
     private final Base64.Encoder encoder = Base64.getEncoder();
 
-    @Override
+    @Autowired
+    @Qualifier("kafkaClientServiceObjectMapper")
+    private ObjectMapper objectMapper;
+
     public RenderedMessage render(
+            String language,
             Integer partition,
             Long timestamp,
             byte[] key,
@@ -59,7 +66,8 @@ public abstract class GraalVMTemplateMessageEngine implements TemplateMessageEng
         var context = GraalVMMessageTemplateContext.builder()
                 .request(request)
                 .response(response)
-                .sessions(new GraalVMSessions(sessionService))
+                .sessions(sessions)
+                .keyValueStorage(keyValueStorage)
                 .build();
 
         try (var js = Context.newBuilder(language)

@@ -6,8 +6,10 @@ import com.github.sibdevtools.session.api.dto.SessionOwnerType;
 import com.github.sibdevtools.session.api.rq.CreateSessionRq;
 import com.github.sibdevtools.session.api.service.SessionService;
 import jakarta.annotation.Nonnull;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.graalvm.polyglot.HostAccess;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
@@ -16,8 +18,9 @@ import java.util.Map;
  * @author sibmaks
  * @since 0.0.7
  */
-@AllArgsConstructor
-public class GraalVMSessions {
+@Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class ServiceKafkaClientGraalVMSessions {
     private final SessionService sessionService;
 
     @HostAccess.Export

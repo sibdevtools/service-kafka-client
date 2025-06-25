@@ -20,10 +20,12 @@ error-api = "0.0.16"
 session-api = "0.0.15"
 storage-api = "0.0.13"
 async-api = "0.0.6"
+key-value-storage-api = "0.0.3"
 
 session-embedded = "0.0.10"
 storage-embedded = "0.1.16"
 async-embedded = "0.0.10"
+key-value-storage-embedded = "0.0.2"
 
 [libraries]
 common-api = { module = "com.github.sibdevtools:api-common", version.ref = "common-api" }
@@ -32,10 +34,12 @@ error-api = { module = "com.github.sibdevtools:api-error", version.ref = "error-
 session-api = { module = "com.github.sibdevtools:api-session", version.ref = "session-api" }
 storage-api = { module = "com.github.sibdevtools:api-storage", version.ref = "storage-api" }
 async-api = { module = "com.github.sibdevtools:api-async", version.ref = "async-api" }
+key-value-storage-api = { module = "com.github.sibdevtools:api-key-value-storage", version.ref = "key-value-storage-api" }
 
 session-embedded = { module = "com.github.sibdevtools:service-session-embedded", version.ref = "session-embedded" }
 storage-embedded = { module = "com.github.sibdevtools:service-storage-embedded", version.ref = "storage-embedded" }
 async-embedded = { module = "com.github.sibdevtools:service-async-embedded", version.ref = "async-embedded" }
+key-value-storage-embedded = { module = "com.github.sibdevtools:service-key-value-storage-embedded", version.ref = "key-value-storage-embedded" }
 
 spring-openapi-starter = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "spring-openapi-doc" }
 
@@ -60,7 +64,8 @@ service-api = [
     "error-api",
     "session-api",
     "storage-api",
-    "async-api"
+    "async-api",
+    "key-value-storage-api"
 ]
 graalvm = [
     "graalvm-js",

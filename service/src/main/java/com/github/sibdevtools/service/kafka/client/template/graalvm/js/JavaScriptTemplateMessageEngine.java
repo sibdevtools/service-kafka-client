@@ -1,13 +1,16 @@
 package com.github.sibdevtools.service.kafka.client.template.graalvm.js;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sibdevtools.service.kafka.client.entity.MessageEngine;
+import com.github.sibdevtools.service.kafka.client.template.RenderedMessage;
+import com.github.sibdevtools.service.kafka.client.template.TemplateMessageEngine;
 import com.github.sibdevtools.service.kafka.client.template.graalvm.GraalVMTemplateMessageEngine;
-import com.github.sibdevtools.session.api.service.SessionService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author sibmaks
@@ -15,13 +18,20 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class JavaScriptTemplateMessageEngine extends GraalVMTemplateMessageEngine {
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+public class JavaScriptTemplateMessageEngine implements TemplateMessageEngine {
+    private final GraalVMTemplateMessageEngine graalVMTemplateMessageEngine;
 
-    @Autowired
-    public JavaScriptTemplateMessageEngine(SessionService sessionService,
-                                           @Qualifier("kafkaClientServiceObjectMapper")
-                                    ObjectMapper objectMapper) {
-        super("js", sessionService, objectMapper);
+    @Override
+    public RenderedMessage render(
+            Integer partition,
+            Long timestamp,
+            byte[] key,
+            byte[] template,
+            Map<String, Serializable> input,
+            Map<String, byte[]> headers
+    ) {
+        return graalVMTemplateMessageEngine.render("js", partition, timestamp, key, template, input, headers);
     }
 
     @Override
