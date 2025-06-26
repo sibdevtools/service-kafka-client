@@ -7,6 +7,7 @@ import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.GraalVMR
 import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.GraalVMResponse;
 import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.ServiceKafkaClientGraalVMSessions;
 import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.kvs.ServiceKafkaClientGraalVMKeyValueStorage;
+import com.github.sibdevtools.service.kafka.client.template.graalvm.dto.utils.ServiceKafkaClientGraalVMUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.polyglot.Context;
@@ -30,6 +31,7 @@ import java.util.Map;
 public class GraalVMTemplateMessageEngine {
     private final ServiceKafkaClientGraalVMSessions sessions;
     private final ServiceKafkaClientGraalVMKeyValueStorage keyValueStorage;
+    private final ServiceKafkaClientGraalVMUtils graalVMUtils;
 
     private final Base64.Decoder decoder = Base64.getDecoder();
     private final Base64.Encoder encoder = Base64.getEncoder();
@@ -68,6 +70,7 @@ public class GraalVMTemplateMessageEngine {
                 .response(response)
                 .sessions(sessions)
                 .keyValueStorage(keyValueStorage)
+                .utils(graalVMUtils)
                 .build();
 
         try (var js = Context.newBuilder(language)
