@@ -21,7 +21,9 @@ import com.github.sibdevtools.storage.api.service.StorageService;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TemplateMessageService {
 
     public static final String SCHEMA_STORAGE_ID = "schemaStorageId";
@@ -45,31 +48,15 @@ public class TemplateMessageService {
     private final AsyncTaskService asyncTaskService;
     private final StorageService storageService;
     private final MessageTemplateRepository repository;
-    private final ObjectMapper objectMapper;
-    private final String bucketCode;
     private final MessagePublisherService messagePublisherService;
     private final TemplateMessageEngineFacade templateMessageEngineFacade;
     private final Base64.Decoder decoder = Base64.getDecoder();
 
-    public TemplateMessageService(
-            AsyncTaskService asyncTaskService,
-            StorageService storageService,
-            MessageTemplateRepository repository,
-            @Qualifier("kafkaClientServiceObjectMapper")
-            ObjectMapper objectMapper,
-            @Value("${kafka.client.service.props.bucket.code}")
-            String bucketCode,
-            MessagePublisherService messagePublisherService,
-            TemplateMessageEngineFacade templateMessageEngineFacade
-    ) {
-        this.asyncTaskService = asyncTaskService;
-        this.storageService = storageService;
-        this.repository = repository;
-        this.objectMapper = objectMapper;
-        this.bucketCode = bucketCode;
-        this.messagePublisherService = messagePublisherService;
-        this.templateMessageEngineFacade = templateMessageEngineFacade;
-    }
+    @Autowired
+    @Qualifier("kafkaClientServiceObjectMapper")
+    private ObjectMapper objectMapper;
+    @Value("${kafka.client.service.props.bucket.code}")
+    private String bucketCode;
 
     public List<MessageTemplateShortRsDto> getAll() {
         return repository.findAll()

@@ -7,7 +7,7 @@ import org.graalvm.polyglot.HostAccess;
  * @since 0.0.19
  */
 public record ValueHolderImpl(
-        @HostAccess.Export Object value,
+        @HostAccess.Export byte[] value,
         @HostAccess.Export ValueMetaImpl meta
 ) {
 }

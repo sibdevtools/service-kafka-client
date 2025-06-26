@@ -20,12 +20,12 @@ error-api = "0.0.16"
 session-api = "0.0.15"
 storage-api = "0.0.13"
 async-api = "0.0.6"
-key-value-storage-api = "0.0.3"
+key-value-storage-api = "0.0.4"
 
 session-embedded = "0.0.10"
 storage-embedded = "0.1.16"
 async-embedded = "0.0.10"
-key-value-storage-embedded = "0.0.2"
+key-value-storage-embedded = "0.0.3"
 
 [libraries]
 common-api = { module = "com.github.sibdevtools:api-common", version.ref = "common-api" }

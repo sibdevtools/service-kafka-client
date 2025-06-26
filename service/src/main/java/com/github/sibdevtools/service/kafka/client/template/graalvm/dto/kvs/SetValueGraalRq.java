@@ -1,15 +1,13 @@
 package com.github.sibdevtools.service.kafka.client.template.graalvm.dto.kvs;
 
-import java.io.Serializable;
-
 /**
  * @author sibmaks
- * @since 0.0.19
+ * @since 0.0.23
  */
-public record SetValueRq(
+public record SetValueGraalRq(
         String space,
         String key,
-        Serializable value,
+        byte[] value,
         Long expiredAt
 ) {
 }

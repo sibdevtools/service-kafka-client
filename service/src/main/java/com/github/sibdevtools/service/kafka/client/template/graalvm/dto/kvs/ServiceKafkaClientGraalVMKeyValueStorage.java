@@ -3,12 +3,15 @@ package com.github.sibdevtools.service.kafka.client.template.graalvm.dto.kvs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.sibdevtools.common.api.rs.StandardBodyRs;
 import com.github.sibdevtools.session.api.dto.ValueMeta;
+import com.github.sibdevtools.session.api.rq.SetValueRq;
 import com.github.sibdevtools.session.api.service.KeyValueStorageService;
 import jakarta.annotation.Nonnull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.graalvm.polyglot.HostAccess;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -27,8 +30,11 @@ import java.util.Set;
 @Component
 @AllArgsConstructor
 public class ServiceKafkaClientGraalVMKeyValueStorage {
-    private final ObjectMapper objectMapper;
     private final KeyValueStorageService keyValueStorageService;
+
+    @Autowired
+    @Qualifier("kafkaClientServiceObjectMapper")
+    private ObjectMapper objectMapper;
 
     private static ValueMetaImpl buildGraalMeta(ValueMeta meta) {
         return new ValueMetaImpl(
@@ -46,7 +52,7 @@ public class ServiceKafkaClientGraalVMKeyValueStorage {
         );
     }
 
-    private static ZonedDateTime getExpiredAtDate(SetValueRq rq) {
+    private static ZonedDateTime getExpiredAtDate(SetValueGraalRq rq) {
         val expiredAt = rq.expiredAt();
         if (expiredAt == null) {
             return null;
@@ -88,9 +94,9 @@ public class ServiceKafkaClientGraalVMKeyValueStorage {
     public ValueMetaImpl set(
             @Nonnull Object arg
     ) {
-        val rq = objectMapper.convertValue(arg, SetValueRq.class);
+        val rq = objectMapper.convertValue(arg, SetValueGraalRq.class);
         val expiredAtDate = getExpiredAtDate(rq);
-        val kvsRq = com.github.sibdevtools.session.api.rq.SetValueRq.builder()
+        val kvsRq = SetValueRq.builder()
                 .space(rq.space())
                 .key(rq.key())
                 .value(rq.value())
